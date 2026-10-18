@@ -158,7 +158,7 @@ section{padding-top:18px;animation:rise .35s ease}
 .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
 .chip{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:5px 10px;border-radius:999px;border:1px solid var(--border)}
 .chip.dom{color:#fff}
-.chip.app{background:var(--surface-2);color:var(--muted)}
+.chip.appr{background:var(--surface-2);color:var(--muted)}
 .qtext{font-family:var(--dsp);font-weight:600;font-size:20px;line-height:1.28;margin:2px 0 16px;letter-spacing:-.2px}
 .opts{display:flex;flex-direction:column;gap:10px}
 .opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:14px 15px;
@@ -213,6 +213,45 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11.5px;lin
 canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
 .toggle{background:none;border:1px solid var(--border);border-radius:999px;color:var(--muted);
   font-size:11px;font-weight:700;padding:5px 10px}
+
+/* ---- v2: bottom nav, daily goal, lightning, achievements ---- */
+.app{padding-bottom:96px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;display:flex;justify-content:center;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:8px max(16px,env(safe-area-inset-left,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-right,0px))}
+nav.tabs .maxw{max-width:480px}
+nav.tabs button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--muted);font-size:10.5px;font-weight:700;padding:4px 18px;border-radius:12px;font-family:var(--body)}
+nav.tabs button .ni{font-size:19px;line-height:1}
+nav.tabs button.on{color:var(--brand-ink)}
+.daily{display:flex;align-items:center;gap:13px;width:100%;background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:12px 14px;box-shadow:var(--shadow-sm)}
+.daily .dring{width:46px;height:46px;flex:0 0 auto}
+.daily .dt{min-width:0}
+.daily .dt b{font-family:var(--dsp);font-size:15px;display:block}
+.daily .dt span{font-size:12px;color:var(--muted)}
+.lwrap{display:flex;flex-direction:column;gap:13px;padding-top:6px}
+.lhud{display:flex;align-items:stretch;gap:9px}
+.lhud .box{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:9px 6px;text-align:center;flex:1}
+.lhud .box b{font-family:var(--dsp);font-size:22px;display:block;line-height:1}
+.lhud .box small{font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.lives{font-size:17px;letter-spacing:1px}
+.lbar{height:10px;border-radius:999px;background:var(--ring-track);overflow:hidden}
+.lbar i{display:block;height:100%;background:linear-gradient(90deg,var(--business),var(--people));width:100%;transition:width .2s linear}
+.combo{font-weight:800;color:var(--business);font-size:14px;min-height:20px;text-align:center}
+.pop{animation:pop .3s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+.ach-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.ach{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+.ach .ai{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-family:var(--dsp);font-weight:800;font-size:17px;background:var(--brand-soft);color:var(--brand-ink);margin-bottom:9px}
+.ach b{font-family:var(--dsp);font-size:14px;display:block}
+.ach p{margin:3px 0 0;font-size:11.5px;color:var(--muted);line-height:1.4}
+.ach.locked{opacity:.5;filter:grayscale(.45)}
+.ach.earned .ai{background:linear-gradient(135deg,var(--brand),var(--people));color:#fff}
+.lvlcard{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;box-shadow:var(--shadow-sm)}
+.lvlcard .lvbig{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--people));color:#fff;display:grid;place-items:center;font-family:var(--dsp);font-weight:800;font-size:20px;flex:0 0 auto}
+.lvlcard .lvtrack{height:8px;border-radius:999px;background:var(--ring-track);overflow:hidden;margin-top:6px}
+.lvlcard .lvtrack i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--people))}
 </style>
 
 <canvas id="fx" hidden></canvas>
@@ -248,6 +287,13 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
         <div class="stat"><b class="tnum" id="s-acc">—</b><small>Accuracy</small></div>
         <div class="stat"><b class="tnum" id="s-streak">0</b><small>Day streak</small></div>
       </div>
+      <div class="daily">
+        <svg class="dring" viewBox="0 0 46 46" aria-hidden="true">
+          <circle cx="23" cy="23" r="19" fill="none" stroke="var(--ring-track)" stroke-width="6"/>
+          <circle id="dgRing" cx="23" cy="23" r="19" fill="none" stroke="var(--business)" stroke-width="6" stroke-linecap="round" stroke-dasharray="119" stroke-dashoffset="119" transform="rotate(-90 23 23)"/>
+        </svg>
+        <div class="dt"><b id="dgText">Daily goal</b><span id="dgSub">Answer 15 questions today</span></div>
+      </div>
       <div class="tip"><span>💡</span><div id="tip"></div></div>
     </div>
 
@@ -262,6 +308,11 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
         <div class="ic a-quick">⚡</div>
         <div class="tx"><b>Quick 10</b><p>A fast mixed set to warm up</p></div>
         <div class="meta">10 Q<span class="best" id="best-quick"></span></div>
+      </button>
+      <button class="mode" onclick="startLightning()">
+        <div class="ic" style="background:linear-gradient(135deg,#e8961a,#ff5d8f)">🔥</div>
+        <div class="tx"><b>Lightning Round</b><p>Beat the clock — combos, lives, high score</p></div>
+        <div class="meta" id="best-lightning"></div>
       </button>
     </div>
 
@@ -329,8 +380,8 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
     </div>
 
     <div class="row" style="margin-top:20px">
-      <button class="btn sec" onclick="reviewAnswers()">Review answers</button>
-      <button class="btn" onclick="retry()">Try again</button>
+      <button class="btn sec" id="btnReview" onclick="reviewAnswers()">Review answers</button>
+      <button class="btn" id="btnRetry" onclick="retry()">Try again</button>
     </div>
     <button class="btn ghost" style="display:block;margin:12px auto 0" onclick="go('home')">Back to home</button>
   </section>
@@ -359,7 +410,54 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
     <div class="toc" id="tocList"></div>
     <footer>Verified against the PMI 2026 PMP Examination Content Outline.</footer>
   </section>
+
+  <!-- LIGHTNING ROUND -->
+  <section id="lightning" hidden>
+    <button class="back" onclick="lQuit()">‹ End game</button>
+    <div class="lwrap">
+      <div class="lhud">
+        <div class="box"><b class="tnum" id="l-time">60</b><small>Seconds</small></div>
+        <div class="box"><b class="tnum" id="l-score">0</b><small>Score</small></div>
+        <div class="box"><b id="l-lives" class="lives">❤❤❤</b><small>Lives</small></div>
+      </div>
+      <div class="lbar"><i id="l-bar"></i></div>
+      <div class="combo" id="l-combo"></div>
+      <div class="chips" id="l-chips"></div>
+      <h2 class="qtext" id="l-q"></h2>
+      <div class="opts" id="l-opts"></div>
+    </div>
+  </section>
+
+  <!-- ACHIEVEMENTS -->
+  <section id="achievements" hidden>
+    <h2 style="font-size:23px;margin:6px 0 12px">Your progress</h2>
+    <div class="lvlcard">
+      <div class="lvbig" id="a-lv">1</div>
+      <div style="flex:1;min-width:0">
+        <b style="font-family:var(--dsp);font-size:16px" id="a-lvname">Initiating</b>
+        <div class="muted" style="font-size:12px" id="a-xp">0 XP</div>
+        <div class="lvtrack"><i id="a-lvfill" style="width:0%"></i></div>
+        <div class="muted" style="font-size:11px;margin-top:4px" id="a-next"></div>
+      </div>
+    </div>
+    <div class="statrow" style="margin-top:12px">
+      <div class="stat"><b class="tnum" id="a-streak">0</b><small>Day streak</small></div>
+      <div class="stat"><b class="tnum" id="a-ans">0</b><small>Answered</small></div>
+      <div class="stat"><b class="tnum" id="a-acc">—</b><small>Accuracy</small></div>
+    </div>
+    <div class="section-head"><h2 style="font-size:18px">Badges</h2><span class="muted" style="font-size:12px" id="a-badgecount"></span></div>
+    <div class="ach-grid" id="achGrid"></div>
+    <footer>Keep a daily streak and your badges fill in. New ones unlock as you practice.</footer>
+  </section>
 </div>
+
+<nav class="tabs" id="tabs">
+  <div class="maxw" style="display:flex;justify-content:space-around;width:100%">
+    <button data-s="home" onclick="go('home')"><span class="ni">⌂</span>Home</button>
+    <button data-s="achievements" onclick="go('achievements')"><span class="ni">★</span>Awards</button>
+    <button data-s="toc" onclick="go('toc')"><span class="ni">▦</span>Guide</button>
+  </div>
+</nav>
 
 <script>
 /* ---------- QUESTION BANK ---------- */
@@ -709,7 +807,7 @@ const TIPS=[
   "Servant leaders <b>remove impediments</b> and help the team find answers — they never hand down the solution.",
   "EV is always <b>first</b> in both variance formulas and the <b>numerator</b> of both indices. That one hook covers most EVM items."
 ];
-let st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
+let st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},daily:{date:null,count:0,goal:15},lightningBest:0,domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
 let session=null, timerId=null;
 
 function load(){
@@ -737,8 +835,14 @@ function verdictText(p){
 }
 
 /* ---------- NAV ---------- */
-const SCREENS=["home","quiz","results","review","toc"];
-function go(id){SCREENS.forEach(s=>document.getElementById(s).hidden=(s!==id));window.scrollTo(0,0);}
+const SCREENS=["home","quiz","results","review","toc","achievements","lightning"];
+function go(id){SCREENS.forEach(s=>document.getElementById(s).hidden=(s!==id));window.scrollTo(0,0);
+  const navOn=["home","achievements","toc"].indexOf(id)>=0;
+  const tabs=document.getElementById("tabs");
+  if(tabs){tabs.style.display=navOn?"flex":"none";[...tabs.querySelectorAll("button")].forEach(b=>b.classList.toggle("on",b.dataset.s===id));}
+  if(id==="achievements")renderAchievements();
+  if(id==="home")refreshHome();
+}
 function refreshHome(){
   const lv=levelFor(st.xp);
   document.getElementById("lvlnum").textContent=lv+1;
@@ -755,6 +859,8 @@ function refreshHome(){
   const seenN=Object.keys(st.seen||{}).length;
   document.getElementById("qbanktotal").textContent=QB.length+" questions"+(seenN?" · "+Math.min(seenN,QB.length)+" seen":"");
   bestTag("best-mock","mock");bestTag("best-quick","quick");
+  updateDaily();
+  const lb=document.getElementById("best-lightning");if(lb)lb.innerHTML=st.lightningBest?("Best "+st.lightningBest):"";
 }
 function bestTag(elId,key){
   const el=document.getElementById(elId);const b=st.best[key];
@@ -846,7 +952,7 @@ function renderQ(){
   const domColor=q.dom==="People"?"var(--people)":q.dom==="Process"?"var(--process)":"var(--business)";
   document.getElementById("qchips").innerHTML=
     `<span class="chip dom" style="background:${domColor}">${q.dom}</span>`+
-    `<span class="chip app">${q.app}</span>`;
+    `<span class="chip appr">${q.app}</span>`;
   document.getElementById("qtext").textContent=q.q;
   const opts=document.getElementById("qopts");opts.innerHTML="";
   const keys=["A","B","C","D","E"];
@@ -877,7 +983,9 @@ function answer(i,btn){
   st.answered++;if(right)st.correct++;
   st.domStats[q.dom][0]++;if(right)st.domStats[q.dom][1]++;
   st.xp+=right?12:3;
+  trackDaily();
   save();
+  awardBadges().forEach(b=>miniToast("🏅 "+b));
   // explanation
   const ex=document.getElementById("qexplain");
   ex.className="explain "+(right?"ok":"no");
@@ -906,12 +1014,15 @@ function finish(){
   if(st.best[key]==null||pct>st.best[key])st.best[key]=pct;
   // badges
   const newBadges=[];
-  const badgeMap={people:"People Pro",process:"Process Master",business:"Business Savvy",agile:"Agile Ace",formula:"Numbers Game",quick:"Warmed Up",mock:"Mock Slayer"};
+  const badgeMap={people:"People Pro",process:"Process Master",business:"Business Savvy",agile:"Agile Ace",formula:"Numbers Game"};
   if(pct>=80&&badgeMap[key]&&!st.badges.includes(badgeMap[key])){st.badges.push(badgeMap[key]);newBadges.push(badgeMap[key]);}
+  if(key==="quick"&&!st.badges.includes("Warmed Up")){st.badges.push("Warmed Up");newBadges.push("Warmed Up");}
   if(key==="mock"&&!st.badges.includes("Mock Slayer")){st.badges.push("Mock Slayer");newBadges.push("Mock Slayer");}
-  if(readiness()>=85&&!st.badges.includes("Exam Ready")){st.badges.push("Exam Ready");newBadges.push("Exam Ready");}
-  if(st.xp>=1600&&!st.badges.includes("Max Level")){st.badges.push("Max Level");newBadges.push("Max Level");}
+  if(n>=10&&pct===100&&!st.badges.includes("Perfectionist")){st.badges.push("Perfectionist");newBadges.push("Perfectionist");}
   st.xp+= (key==="mock"?40:15); // completion bonus
+  awardBadges().forEach(b=>{if(!newBadges.includes(b))newBadges.push(b);});
+  lastWasLightning=false;
+  var _br=document.getElementById("btnReview");if(_br)_br.style.display="";
   save();
   // render
   document.getElementById("r-mode").textContent=session.title.toUpperCase()+" · "+n+" QUESTIONS";
@@ -949,8 +1060,9 @@ function finish(){
   go("results");
   if(pct>=75)fireConfetti();
 }
-function retry(){start(session.mode);}
+function retry(){if(lastWasLightning)startLightning();else start(session.mode);}
 function reviewAnswers(){
+  if(lastWasLightning)return;
   const list=document.getElementById("reviewList");list.innerHTML="";
   const keys=["A","B","C","D","E"];
   session.answers.forEach((a,i)=>{
@@ -1017,7 +1129,7 @@ function toggleTheme(){
   try{localStorage.setItem("pmpft-theme",dark?"light":"dark");}catch(e){}
 }
 function resetProgress(){
-  st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
+  st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},daily:{date:null,count:0,goal:15},lightningBest:0,domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
   save();refreshHome();buildAreas();
 }
 
@@ -1038,6 +1150,147 @@ function fireConfetti(){
     if(t<95)requestAnimationFrame(anim);else{cv.hidden=true;ctx.clearRect(0,0,cv.width,cv.height);}
   })();
 }
+
+/* ---------- v2: daily goal, badges, achievements, lightning ---------- */
+const BADGES=[
+  {id:"First Steps",icon:"▸",desc:"Answer your first question"},
+  {id:"Warmed Up",icon:"⚡",desc:"Finish a Quick 10"},
+  {id:"Half Century",icon:"50",desc:"Answer 50 questions"},
+  {id:"Century",icon:"100",desc:"Answer 100 questions"},
+  {id:"Sharpshooter",icon:"◎",desc:"85%+ accuracy over 50+ questions"},
+  {id:"On Fire",icon:"🔥",desc:"Keep a 7-day streak"},
+  {id:"Daily Dedication",icon:"✓",desc:"Hit your daily goal"},
+  {id:"People Pro",icon:"P",desc:"Score 80%+ in a People set"},
+  {id:"Process Master",icon:"⚙",desc:"Score 80%+ in a Process set"},
+  {id:"Business Savvy",icon:"◉",desc:"Score 80%+ in a Business set"},
+  {id:"Agile Ace",icon:"∞",desc:"Score 80%+ in an Agile set"},
+  {id:"Numbers Game",icon:"∑",desc:"Score 80%+ in a Formulas set"},
+  {id:"Perfectionist",icon:"★",desc:"100% on a set of 10 or more"},
+  {id:"Mock Slayer",icon:"◆",desc:"Finish a full Mock Exam"},
+  {id:"Lightning",icon:"⚡",desc:"Score 150+ in a Lightning Round"},
+  {id:"Exam Ready",icon:"🎯",desc:"Reach 85% exam readiness"},
+  {id:"Max Level",icon:"♛",desc:"Reach the PMP-Ready level"}
+];
+function earn(id,out){if(!st.badges.includes(id)){st.badges.push(id);out.push(id);}}
+function awardBadges(){
+  const out=[];
+  if(st.answered>=1)earn("First Steps",out);
+  if(st.answered>=50)earn("Half Century",out);
+  if(st.answered>=100)earn("Century",out);
+  if(st.answered>=50 && st.correct/st.answered>=0.85)earn("Sharpshooter",out);
+  if(st.streak>=7)earn("On Fire",out);
+  if(st.daily && st.daily.date===todayStr() && st.daily.count>=(st.daily.goal||15))earn("Daily Dedication",out);
+  if(st.xp>=1600)earn("Max Level",out);
+  if(readiness()>=85)earn("Exam Ready",out);
+  if(out.length)save();
+  return out;
+}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function trackDaily(){const t=todayStr();if(!st.daily)st.daily={date:null,count:0,goal:15};if(st.daily.date!==t){st.daily.date=t;st.daily.count=0;}st.daily.count++;}
+function updateDaily(){
+  if(!st.daily)st.daily={date:null,count:0,goal:15};
+  const t=todayStr();const c=(st.daily.date===t)?st.daily.count:0;const g=st.daily.goal||15;
+  const pct=Math.min(1,c/g);
+  const r=document.getElementById("dgRing");if(r)r.style.strokeDashoffset=(119-119*pct).toFixed(1);
+  const tx=document.getElementById("dgText");const sub=document.getElementById("dgSub");
+  if(tx)tx.innerHTML=c>=g?"🔥 Daily goal complete":"Daily goal";
+  if(sub)sub.textContent=c>=g?(c+" answered today"+(st.streak>1?(" · "+st.streak+"-day streak"):"")):(c+" / "+g+" questions today");
+}
+function miniToast(txt){
+  let t=document.getElementById("mtoast");
+  if(!t){t=document.createElement("div");t.id="mtoast";
+    t.setAttribute("style","position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:45;background:var(--brand);color:#fff;padding:10px 16px;border-radius:999px;font:800 13px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;transition:opacity .25s;pointer-events:none");
+    document.body.appendChild(t);}
+  t.textContent=txt;t.style.opacity="1";clearTimeout(t._h);t._h=setTimeout(()=>{t.style.opacity="0";},1800);
+}
+function renderAchievements(){
+  const lv=levelFor(st.xp);
+  document.getElementById("a-lv").textContent=lv+1;
+  document.getElementById("a-lvname").textContent=LEVELS[lv].name;
+  document.getElementById("a-xp").textContent=st.xp+" XP";
+  const nxt=LEVELS[lv+1];const cur=LEVELS[lv].xp;
+  document.getElementById("a-lvfill").style.width=(nxt?Math.min(100,(st.xp-cur)/(nxt.xp-cur)*100):100)+"%";
+  document.getElementById("a-next").textContent=nxt?((nxt.xp-st.xp)+" XP to "+nxt.name):"Max level reached";
+  document.getElementById("a-streak").textContent=st.streak;
+  document.getElementById("a-ans").textContent=st.answered;
+  document.getElementById("a-acc").textContent=st.answered?Math.round(st.correct/st.answered*100)+"%":"—";
+  document.getElementById("a-badgecount").textContent=st.badges.length+" / "+BADGES.length;
+  const grid=document.getElementById("achGrid");grid.innerHTML="";
+  BADGES.forEach(b=>{const has=st.badges.includes(b.id);
+    const d=document.createElement("div");d.className="ach "+(has?"earned":"locked");
+    d.innerHTML=`<div class="ai">${b.icon}</div><b>${b.id}</b><p>${b.desc}</p>`;grid.appendChild(d);});
+}
+/* ---- Lightning Round ---- */
+let lsession=null,lTimer=null,lastWasLightning=false;
+function startLightning(){
+  markDay();
+  const queue=draw(QB.map((_,i)=>i),60).map(i=>QB[i]);save();
+  lsession={queue,idx:0,score:0,lives:3,combo:0,answered:0,correct:0,end:Date.now()+60000};
+  go("lightning");lRender();
+  stopLTimer();
+  lTimer=setInterval(()=>{
+    const left=Math.max(0,Math.ceil((lsession.end-Date.now())/1000));
+    const te=document.getElementById("l-time");if(te)te.textContent=left;
+    const lb=document.getElementById("l-bar");if(lb)lb.style.width=(left/60*100)+"%";
+    if(left<=0)lEnd();
+  },200);
+}
+function stopLTimer(){if(lTimer){clearInterval(lTimer);lTimer=null;}}
+function lRender(){
+  if(lsession.idx>=lsession.queue.length){lsession.queue=lsession.queue.concat(draw(QB.map((_,i)=>i),30).map(i=>QB[i]));save();}
+  const q=lsession.queue[lsession.idx];
+  const domColor=q.dom==="People"?"var(--people)":q.dom==="Process"?"var(--process)":"var(--business)";
+  document.getElementById("l-chips").innerHTML=`<span class="chip dom" style="background:${domColor}">${q.dom}</span><span class="chip appr">${q.app}</span>`;
+  document.getElementById("l-q").textContent=q.q;
+  document.getElementById("l-lives").textContent="❤".repeat(lsession.lives)+"🖤".repeat(3-lsession.lives);
+  document.getElementById("l-combo").textContent=lsession.combo>=2?("🔥 Combo ×"+Math.min(5,lsession.combo)):"";
+  const opts=document.getElementById("l-opts");opts.innerHTML="";
+  const keys=["A","B","C","D"];
+  const order=shuffle(q.o.map((_,i)=>i));const correctDisp=order.indexOf(q.a);
+  order.forEach((orig,disp)=>{const b=document.createElement("button");b.className="opt";
+    b.innerHTML=`<span class="key">${keys[disp]}</span><span>${q.o[orig]}</span>`;
+    b.onclick=()=>lAnswer(disp,correctDisp);opts.appendChild(b);});
+}
+function lAnswer(i,correct){
+  if(!lsession)return;
+  const opts=[...document.getElementById("l-opts").children];
+  if(opts[0]&&opts[0].disabled)return;
+  opts.forEach((o,idx)=>{o.disabled=true;if(idx===correct)o.classList.add("correct");else if(idx===i)o.classList.add("wrong");else o.classList.add("dim");});
+  const right=i===correct;const q=lsession.queue[lsession.idx];
+  lsession.answered++;st.answered++;if(right)st.correct++;st.domStats[q.dom][0]++;if(right)st.domStats[q.dom][1]++;
+  if(right){lsession.combo++;lsession.correct++;const mult=Math.min(5,lsession.combo);lsession.score+=10*mult;st.xp+=5;
+    const sc=document.getElementById("l-score");if(sc){sc.textContent=lsession.score;sc.classList.remove("pop");void sc.offsetWidth;sc.classList.add("pop");}
+  }else{lsession.combo=0;lsession.lives--;st.xp+=1;}
+  trackDaily();save();awardBadges();
+  document.getElementById("l-combo").textContent=lsession.combo>=2?("🔥 Combo ×"+Math.min(5,lsession.combo)):"";
+  const lv=Math.max(0,lsession.lives);document.getElementById("l-lives").textContent="❤".repeat(lv)+"🖤".repeat(3-lv);
+  if(lsession.lives<=0){setTimeout(lEnd,480);return;}
+  setTimeout(()=>{if(lsession){lsession.idx++;lRender();}},430);
+}
+function lEnd(){
+  if(!lsession)return;stopLTimer();
+  const final=lsession.score,correct=lsession.correct,answered=lsession.answered;
+  const newB=[];
+  if(final>=150)earn("Lightning",newB);
+  awardBadges().forEach(b=>newB.push(b));
+  const isHigh=final>st.lightningBest;if(isHigh)st.lightningBest=final;
+  st.xp+=20;save();
+  document.getElementById("r-mode").textContent="LIGHTNING ROUND";
+  document.getElementById("r-title").textContent=isHigh&&final>0?"New high score!":(final>=150?"Electric!":"Nice run");
+  const cap=Math.max(200,st.lightningBest);setRing("rring",Math.min(100,final/cap*100),402);
+  document.getElementById("r-score").textContent=final;
+  document.getElementById("r-frac").textContent=correct+" correct";
+  document.getElementById("r-dombox").style.display="none";
+  document.getElementById("r-msg").textContent="Best "+st.lightningBest+" · "+correct+"/"+answered+" right. Combos multiply your points — chain correct answers to climb.";
+  const bb=document.getElementById("r-badge");if(newB.length){bb.hidden=false;bb.innerHTML="🏅 New: "+newB.join(" · ");}else bb.hidden=true;
+  const eb=document.getElementById("r-earnedbox"),e=document.getElementById("r-earned");
+  if(st.badges.length){eb.hidden=false;e.innerHTML=st.badges.map(x=>`<span class="btag">🏅 ${x}</span>`).join("");}else eb.hidden=true;
+  const _br=document.getElementById("btnReview");if(_br)_br.style.display="none";
+  lastWasLightning=true;lsession=null;
+  go("results");
+  if(final>0&&isHigh)fireConfetti();
+}
+function lQuit(){stopLTimer();lsession=null;refreshHome();go("home");}
 
 /* ---------- INIT ---------- */
 (function(){

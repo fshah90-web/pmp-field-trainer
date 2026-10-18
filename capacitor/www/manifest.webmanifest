@@ -1,0 +1,18 @@
+{
+  "name": "PMP Field Trainer",
+  "short_name": "PMP Trainer",
+  "description": "Gamified PMP exam prep — 300 current questions, mock exams, and a study map for the 2026 exam.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f0b1e",
+  "theme_color": "#6d4be0",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

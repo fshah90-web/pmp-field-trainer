@@ -1,0 +1,17 @@
+{
+  "name": "pmp-field-trainer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PMP Field Trainer — PMP exam prep app",
+  "scripts": {
+    "sync": "cap sync",
+    "ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "6.1.2",
+    "@capacitor/ios": "6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.1.2"
+  }
+}

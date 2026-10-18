@@ -1,0 +1,1084 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PMP Field Trainer</title>
+<meta name="description" content="Gamified PMP exam prep — 300 current questions, mock exams, and a study map for the 2026 exam.">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181231">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PMP Trainer">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+<style>
+/* reset (replicates the host wrapper the app was authored against) */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+html,body{margin:0}
+body{font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<style>
+/* Layout: mobile-first single-column app (max 480px), screens swapped via JS;
+   sticky brand header; domain-colored cards; gamified ring + XP. */
+:root{
+  --bg:#f4f2fb; --surface:#ffffff; --surface-2:#faf8ff; --fg:#191233; --muted:#6c6484;
+  --border:#e7e2f3; --brand:#6d4be0; --brand-ink:#4a2fb8; --brand-soft:#efeaff;
+  --people:#ff5d8f; --process:#11b3a6; --business:#e8961a;
+  --good:#15a04a; --bad:#dd3451; --ring-track:#e7e2f3;
+  --shadow:0 8px 28px rgba(60,40,120,.10); --shadow-sm:0 2px 10px rgba(60,40,120,.08);
+  --r:18px;
+  --dsp:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Hanken Grotesk",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f0b1e; --surface:#181231; --surface-2:#1f1840; --fg:#f3efff; --muted:#a79fc4;
+  --border:#2c2452; --brand:#9b86ff; --brand-ink:#c3b5ff; --brand-soft:#241c48;
+  --people:#ff7aa6; --process:#3bd6c8; --business:#ffc155;
+  --good:#54d98a; --bad:#ff6d82; --ring-track:#2c2452;
+  --shadow:0 10px 30px rgba(0,0,0,.4); --shadow-sm:0 2px 12px rgba(0,0,0,.35);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f0b1e; --surface:#181231; --surface-2:#1f1840; --fg:#f3efff; --muted:#a79fc4;
+  --border:#2c2452; --brand:#9b86ff; --brand-ink:#c3b5ff; --brand-soft:#241c48;
+  --people:#ff7aa6; --process:#3bd6c8; --business:#ffc155;
+  --good:#54d98a; --bad:#ff6d82; --ring-track:#2c2452;
+  --shadow:0 10px 30px rgba(0,0,0,.4); --shadow-sm:0 2px 12px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);
+  background:var(--surface);z-index:30}
+h1,h2,h3{font-family:var(--dsp);font-weight:700;line-height:1.08;text-wrap:balance;margin:0}
+button{font-family:var(--body);cursor:pointer}
+.tnum{font-variant-numeric:tabular-nums}
+a{color:var(--brand-ink)}
+
+/* App shell */
+.app{max-width:480px;margin:0 auto;min-height:100%;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-bottom:48px;}
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px))) 0 calc(-1*max(16px,env(safe-area-inset-right,0px)));
+  padding:10px max(16px,env(safe-area-inset-left,0px));
+  display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.logo{width:30px;height:30px;border-radius:9px;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--brand),var(--people));
+  display:grid;place-items:center;color:#fff;font-family:var(--dsp);font-weight:800;font-size:15px;
+  box-shadow:0 3px 10px rgba(109,75,224,.4)}
+.brand b{font-family:var(--dsp);font-size:16px;letter-spacing:-.2px;white-space:nowrap}
+.brand small{display:block;color:var(--muted);font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;margin-top:-2px}
+.lvlchip{display:flex;align-items:center;gap:7px;background:var(--brand-soft);
+  border:1px solid var(--border);border-radius:999px;padding:5px 11px 5px 8px;flex:0 0 auto}
+.lvlchip .lv{width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;
+  font-weight:800;font-size:11px;display:grid;place-items:center}
+.lvlchip span{font-size:11px;font-weight:700;color:var(--brand-ink);white-space:nowrap}
+
+/* Generic */
+section{padding-top:18px;animation:rise .35s ease}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){section{animation:none}*{scroll-behavior:auto}}
+.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:11px;font-weight:700;color:var(--muted)}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-sm)}
+.btn{border:none;border-radius:14px;padding:15px 18px;font-size:16px;font-weight:700;
+  background:var(--brand);color:#fff;width:100%;box-shadow:0 6px 18px rgba(109,75,224,.32);
+  transition:transform .12s ease,box-shadow .12s ease}
+.btn:active{transform:translateY(1px) scale(.995)}
+.btn.sec{background:var(--surface);color:var(--fg);border:1.5px solid var(--border);box-shadow:none}
+.btn.ghost{background:transparent;color:var(--brand-ink);box-shadow:none;border:none;width:auto;padding:10px 4px}
+.row{display:flex;gap:10px}
+.back{background:none;border:none;color:var(--muted);font-weight:700;font-size:14px;padding:4px 0;display:inline-flex;align-items:center;gap:6px}
+
+/* Home hero */
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding-top:22px}
+.hero h1{font-size:30px;letter-spacing:-.5px}
+.hero .sub{color:var(--muted);font-size:14.5px;max-width:30ch}
+.ring-wrap{position:relative;width:188px;height:188px;margin:6px 0 2px}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring-center .pct{font-family:var(--dsp);font-weight:800;font-size:46px;line-height:1}
+.ring-center .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-top:4px}
+.verdict{font-weight:700;font-size:13.5px;padding:4px 0}
+.statrow{display:flex;gap:10px;width:100%;margin-top:4px}
+.stat{flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:11px 8px;text-align:center}
+.stat b{font-family:var(--dsp);font-size:21px;display:block}
+.stat small{color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em}
+.tip{width:100%;background:var(--brand-soft);border:1px solid var(--border);border-radius:14px;
+  padding:12px 14px;font-size:13.5px;text-align:left;display:flex;gap:10px;align-items:flex-start}
+.tip b{color:var(--brand-ink)}
+
+.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:22px 0 10px}
+.section-head h2{font-size:19px}
+
+/* Mode list */
+.modes{display:flex;flex-direction:column;gap:11px}
+.mode{display:flex;align-items:center;gap:13px;padding:15px;text-align:left;width:100%;
+  border:1px solid var(--border);background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow-sm);
+  transition:transform .12s ease}
+.mode:active{transform:translateY(1px)}
+.mode .ic{width:46px;height:46px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-family:var(--dsp);font-weight:800;font-size:19px}
+.mode .tx{flex:1;min-width:0}
+.mode .tx b{font-size:15.5px;font-family:var(--dsp)}
+.mode .tx p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.mode .meta{flex:0 0 auto;text-align:right;font-size:11px;color:var(--muted);font-weight:700}
+.mode .best{display:block;font-size:11px;font-weight:800;margin-top:3px}
+.chev{color:var(--muted);flex:0 0 auto}
+
+/* Domain accent helpers */
+.a-people{background:var(--people)} .a-process{background:var(--process)} .a-business{background:var(--business)}
+.a-agile{background:linear-gradient(135deg,#7c5cff,#11b3a6)} .a-formula{background:linear-gradient(135deg,#e8961a,#ff5d8f)}
+.a-mock{background:linear-gradient(135deg,var(--brand),var(--people))} .a-quick{background:linear-gradient(135deg,#11b3a6,#6d4be0)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+
+/* Quiz */
+.qtop{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pbar{flex:1;height:9px;border-radius:999px;background:var(--ring-track);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--brand),var(--people));transition:width .35s ease}
+.qcount{font-size:12.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.timer{font-size:12.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.chip{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:5px 10px;border-radius:999px;border:1px solid var(--border)}
+.chip.dom{color:#fff}
+.chip.app{background:var(--surface-2);color:var(--muted)}
+.qtext{font-family:var(--dsp);font-weight:600;font-size:20px;line-height:1.28;margin:2px 0 16px;letter-spacing:-.2px}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:14px 15px;
+  border:1.5px solid var(--border);background:var(--surface);border-radius:14px;font-size:15px;color:var(--fg);
+  transition:border-color .12s,background .12s}
+.opt .key{width:25px;height:25px;border-radius:8px;flex:0 0 auto;background:var(--surface-2);
+  border:1px solid var(--border);display:grid;place-items:center;font-weight:800;font-size:13px;color:var(--muted)}
+.opt:active{transform:translateY(1px)}
+.opt.correct{border-color:var(--good);background:color-mix(in srgb,var(--good) 12%,var(--surface))}
+.opt.correct .key{background:var(--good);color:#fff;border-color:var(--good)}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface))}
+.opt.wrong .key{background:var(--bad);color:#fff;border-color:var(--bad)}
+.opt.dim{opacity:.6}
+.opt[disabled]{cursor:default}
+.explain{margin-top:14px;border-radius:14px;padding:14px 15px;font-size:14px;border:1px solid var(--border);
+  background:var(--surface-2);animation:rise .25s ease}
+.explain .vhead{font-weight:800;font-family:var(--dsp);font-size:14.5px;margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.explain.ok .vhead{color:var(--good)} .explain.no .vhead{color:var(--bad)}
+.qnav{margin-top:16px}
+
+/* Results */
+.res-hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:8px}
+.res-hero h1{font-size:27px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--brand-soft);border:1px solid var(--border);
+  border-radius:999px;padding:7px 14px;font-weight:800;font-size:13px;color:var(--brand-ink);margin-top:6px}
+.dombars{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.dombar b{font-size:13px;font-weight:700}
+.dombar .track{height:11px;border-radius:999px;background:var(--ring-track);overflow:hidden;margin-top:5px}
+.dombar .track i{display:block;height:100%;border-radius:999px}
+.dombar .nums{float:right;font-size:12px;color:var(--muted);font-weight:700}
+.earned{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.btag{font-size:12px;font-weight:800;padding:7px 11px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border)}
+
+/* TOC */
+.toc{display:flex;flex-direction:column;gap:9px}
+.part{border:1px solid var(--border);background:var(--surface);border-radius:15px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.part summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 14px}
+.part summary::-webkit-details-marker{display:none}
+.part .num{width:38px;height:38px;flex:0 0 auto;border-radius:11px;background:var(--brand-soft);color:var(--brand-ink);
+  display:grid;place-items:center;font-family:var(--dsp);font-weight:800;font-size:14px}
+.part .ht{flex:1;min-width:0}
+.part .ht b{font-family:var(--dsp);font-size:15px;display:block}
+.part .ht span{font-size:12px;color:var(--muted)}
+.part .plus{color:var(--muted);transition:transform .2s}
+.part[open] .plus{transform:rotate(45deg)}
+.part .body{padding:0 14px 14px 64px;font-size:13.5px;color:var(--muted)}
+.part .body .pr{margin-top:10px}
+.appendix .num{background:var(--surface-2);color:var(--muted)}
+
+footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11.5px;line-height:1.6}
+
+canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+.toggle{background:none;border:1px solid var(--border);border-radius:999px;color:var(--muted);
+  font-size:11px;font-weight:700;padding:5px 10px}
+</style>
+
+<canvas id="fx" hidden></canvas>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <div class="logo">P</div>
+      <div><b>PMP Field Trainer</b><small id="lvlname">Initiating</small></div>
+    </div>
+    <div class="lvlchip" title="Your level and XP">
+      <div class="lv" id="lvlnum">1</div><span id="xpval">0 XP</span>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section id="home">
+    <div class="hero">
+      <div class="ring-wrap">
+        <svg width="188" height="188" viewBox="0 0 188 188" aria-hidden="true">
+          <circle cx="94" cy="94" r="82" fill="none" stroke="var(--ring-track)" stroke-width="16"/>
+          <circle id="ring" cx="94" cy="94" r="82" fill="none" stroke="url(#g)" stroke-width="16"
+            stroke-linecap="round" stroke-dasharray="515" stroke-dashoffset="515"/>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="var(--brand)"/><stop offset="1" stop-color="var(--people)"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="ring-center"><div class="pct tnum" id="readypct">0%</div><div class="lbl">Exam Ready</div></div>
+      </div>
+      <div class="verdict" id="verdict">Take a set to measure your readiness</div>
+      <div class="statrow">
+        <div class="stat"><b class="tnum" id="s-ans">0</b><small>Answered</small></div>
+        <div class="stat"><b class="tnum" id="s-acc">—</b><small>Accuracy</small></div>
+        <div class="stat"><b class="tnum" id="s-streak">0</b><small>Day streak</small></div>
+      </div>
+      <div class="tip"><span>💡</span><div id="tip"></div></div>
+    </div>
+
+    <div class="section-head"><h2>Jump in</h2><span class="muted" style="font-size:12px" id="qbanktotal"></span></div>
+    <div class="modes">
+      <button class="mode" onclick="start('mock')">
+        <div class="ic a-mock">★</div>
+        <div class="tx"><b>Mock Exam</b><p>40 questions, weighted like the real 2026 exam</p></div>
+        <div class="meta">4&nbsp;dom<span class="best" id="best-mock"></span></div>
+      </button>
+      <button class="mode" onclick="start('quick')">
+        <div class="ic a-quick">⚡</div>
+        <div class="tx"><b>Quick 10</b><p>A fast mixed set to warm up</p></div>
+        <div class="meta">10 Q<span class="best" id="best-quick"></span></div>
+      </button>
+    </div>
+
+    <div class="section-head"><h2>Practice by area</h2></div>
+    <div class="modes" id="areaModes"></div>
+
+    <div class="section-head"><h2>Study map</h2><button class="btn ghost" onclick="go('toc')">Open guide →</button></div>
+    <button class="mode" onclick="go('toc')">
+      <div class="ic" style="background:linear-gradient(135deg,#4a2fb8,#e8961a)">▦</div>
+      <div class="tx"><b>The PMP Field Guide</b><p>Table of contents &amp; how to use each part</p></div>
+      <span class="chev">›</span>
+    </button>
+
+    <footer>
+      Built from <b>The PMP Field Guide</b> · Professor Farooq A. Shah, MPM, PMP, ACP<br>
+      Aligned to the PMI 2026 Examination Content Outline (exam of 9 Jul 2026).<br>
+      <button class="toggle" onclick="toggleTheme()" style="margin-top:10px">Toggle light / dark</button>
+      <button class="toggle" onclick="resetProgress()" style="margin-top:10px">Reset progress</button>
+    </footer>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" hidden>
+    <button class="back" onclick="confirmQuit()">‹ Save &amp; exit</button>
+    <div class="qtop">
+      <div class="pbar"><i id="pfill"></i></div>
+      <div class="qcount tnum" id="qcount">1/10</div>
+      <div class="timer tnum" id="qtimer" hidden></div>
+    </div>
+    <div class="chips" id="qchips"></div>
+    <h2 class="qtext" id="qtext"></h2>
+    <div class="opts" id="qopts"></div>
+    <div id="qexplain"></div>
+    <div class="qnav" id="qnav" hidden><button class="btn" id="nextbtn" onclick="next()">Next →</button></div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" hidden>
+    <div class="res-hero">
+      <div class="eyebrow" id="r-mode">RESULTS</div>
+      <h1 id="r-title">Nice work</h1>
+      <div class="ring-wrap" style="width:150px;height:150px;margin:8px 0 0">
+        <svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true">
+          <circle cx="75" cy="75" r="64" fill="none" stroke="var(--ring-track)" stroke-width="13"/>
+          <circle id="rring" cx="75" cy="75" r="64" fill="none" stroke="url(#g2)" stroke-width="13"
+            stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"/>
+          <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="var(--brand)"/><stop offset="1" stop-color="var(--people)"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="ring-center"><div class="pct tnum" id="r-score">0%</div><div class="lbl" id="r-frac">0 / 0</div></div>
+      </div>
+      <div class="badge" id="r-badge" hidden></div>
+      <p class="muted" id="r-msg" style="max-width:32ch;margin:8px 0 0"></p>
+    </div>
+
+    <div class="card" style="padding:16px;margin-top:20px" id="r-dombox">
+      <div class="eyebrow" style="margin-bottom:12px">By domain</div>
+      <div class="dombars" id="r-dombars"></div>
+    </div>
+
+    <div id="r-earnedbox" hidden style="margin-top:18px">
+      <div class="eyebrow" style="margin-bottom:8px">Badges earned</div>
+      <div class="earned" id="r-earned"></div>
+    </div>
+
+    <div class="row" style="margin-top:20px">
+      <button class="btn sec" onclick="reviewAnswers()">Review answers</button>
+      <button class="btn" onclick="retry()">Try again</button>
+    </div>
+    <button class="btn ghost" style="display:block;margin:12px auto 0" onclick="go('home')">Back to home</button>
+  </section>
+
+  <!-- REVIEW -->
+  <section id="review" hidden>
+    <button class="back" onclick="go('results')">‹ Back to results</button>
+    <h2 style="font-size:20px;margin:6px 0 14px">Answer review</h2>
+    <div id="reviewList" style="display:flex;flex-direction:column;gap:14px"></div>
+    <button class="btn" style="margin-top:18px" onclick="go('home')">Done</button>
+  </section>
+
+  <!-- TOC -->
+  <section id="toc" hidden>
+    <button class="back" onclick="go('home')">‹ Home</button>
+    <h2 style="font-size:23px;margin:6px 0 2px">The PMP Field Guide</h2>
+    <p class="muted" style="font-size:13.5px;margin:0 0 4px">
+      Everything you need to pass — built for the exam PMI launched on 9 July 2026.
+      Tap a part to see what it covers, and practice the topics that have questions.</p>
+    <div class="card" style="padding:12px 14px;margin:12px 0 16px;font-size:13px">
+      <b style="color:var(--brand-ink)">What changed in 2026:</b>
+      <span class="dot a-people"></span>People <b>33%</b> ·
+      <span class="dot a-process"></span>Process <b>41%</b> ·
+      <span class="dot a-business"></span>Business Env <b>26%</b>. 180 Q / 240 min · PMBOK 8 · 40% predictive, 60% agile &amp; hybrid.
+    </div>
+    <div class="toc" id="tocList"></div>
+    <footer>Verified against the PMI 2026 PMP Examination Content Outline.</footer>
+  </section>
+</div>
+
+<script>
+/* ---------- QUESTION BANK ---------- */
+/* cat: practice bucket · dom: exam-weighting domain (People/Process/Business) · app: approach chip */
+const P="People",PR="Process",B="Business";
+const QB=[
+/* ----- PEOPLE ----- */
+{cat:"people",dom:P,app:"General",q:"Two senior engineers are locked in a disagreement over the technical design, and the work has stalled. What is the BEST way to resolve it?",o:["Bring both together to work through the issue and reach a shared solution","Have the sponsor decide so work can resume","Split the difference between the two designs","Reassign one engineer to another task"],a:0,e:"Collaborating / problem-solving produces a lasting win-win and is PMI's preferred conflict mode. Avoid authority, compromise, or avoidance when there is time to solve the real issue."},
+{cat:"people",dom:P,app:"General",q:"A critical release ships in 20 minutes and two team members must stop arguing immediately so it can go out. Which conflict mode is appropriate as a temporary measure?",o:["Forcing / directing","Collaborating","Withdrawing","Smoothing"],a:0,e:"When stakes are high and time is extremely short, forcing is an acceptable temporary measure. Return to collaboration afterward to address the underlying issue."},
+{cat:"people",dom:P,app:"General",q:"A high-performing team suddenly shows friction right after a new member joins. Using Tuckman's model, the team has most likely regressed to:",o:["Storming","Forming","Norming","Adjourning"],a:0,e:"Teams commonly slip back to Storming when a member joins or leaves, the goal changes, or the team is reorganized."},
+{cat:"people",dom:P,app:"Agile",q:"A servant leader learns the team is blocked by an external dependency they cannot resolve themselves. What should the leader do?",o:["Remove the impediment for the team","Tell the team exactly how to solve it","Escalate to replace an underperforming member","Log it in the risk register and wait"],a:0,e:"Removing impediments is the core of the servant-leader role. If an option says the leader cleared a blocker, it is usually correct."},
+{cat:"people",dom:P,app:"Agile",q:"A team that is brand new to agile keeps floundering whenever it is left to self-organize. What is the appropriate servant-leader response?",o:["Provide more directive guidance until the team matures","Stay fully hands-off; self-organization is sacred","Replace the team with experienced people","Abandon agile and run the work predictively"],a:0,e:"A sanctioned exception to non-directive leadership: a team genuinely new to agile may be led more directively until it can self-organize."},
+{cat:"people",dom:P,app:"General",q:"A brilliant engineer is promoted to lead people and struggles badly. Which bias most likely drove the promotion decision?",o:["Halo effect","Hawthorne effect","Groupthink","Confirmation bias"],a:0,e:"The halo effect assumes someone good at one thing (engineering) will be good at an unrelated thing (managing people) — a classic promotion trap."},
+{cat:"people",dom:P,app:"General",q:"Output improves simply because the team knows a new metric is being watched. This is the:",o:["Hawthorne effect","Halo effect","Herzberg effect","Theory X effect"],a:0,e:"The Hawthorne effect: people change behavior because they are being observed. It is also a warning that measurement itself can distort behavior."},
+{cat:"people",dom:P,app:"General",q:"You are about to negotiate with a vendor and identify what you will do if the talks fail entirely. You have defined your:",o:["BATNA","ZOPA","Walk-away price","WBS"],a:0,e:"BATNA = Best Alternative To a Negotiated Agreement. ZOPA is the zone of possible agreement; knowing your BATNA sets your walk-away point."},
+{cat:"people",dom:P,app:"General",q:"A dispute arises with a seller during the contract. Per PMI, which step comes FIRST?",o:["Negotiation","Litigation","Arbitration","Mediation"],a:0,e:"PMI's escalation order is negotiation → mediation → arbitration → litigation. Negotiation is always first; litigation is always last."},
+{cat:"people",dom:P,app:"General",q:"A team member has been underperforming for several sprints. What should you do FIRST?",o:["Talk with them privately to understand the root cause","Report them to HR for removal","Quietly redistribute their work to others","Reduce their responsibilities without discussion"],a:0,e:"Assess and understand before acting. PMI favors coaching and addressing root causes over removing or working around people."},
+{cat:"people",dom:P,app:"General",q:"In Herzberg's theory, which of these is a true motivator rather than a hygiene factor?",o:["Recognition and achievement","Salary","Working conditions","Company policies"],a:0,e:"Motivators (achievement, recognition, growth) drive satisfaction. Hygiene factors (salary, conditions, policies) only prevent dissatisfaction when adequate."},
+{cat:"people",dom:P,app:"General",q:"The team is anxious about rumored layoffs and productivity drops. On Maslow's hierarchy, which need is threatened?",o:["Safety / security","Esteem","Self-actualization","Belonging"],a:0,e:"Job security sits at the Safety level. Lower-order needs must be met before higher ones meaningfully motivate."},
+{cat:"people",dom:P,app:"General",q:"A manager who assumes people are self-motivated and will seek responsibility is practicing:",o:["McGregor's Theory Y","McGregor's Theory X","Theory Z","Expectancy theory"],a:0,e:"Theory Y managers assume people want to do good work; Theory X managers assume people must be controlled and coerced."},
+{cat:"people",dom:P,app:"General",q:"In a matrix organization you have no formal authority over the team. Your most effective source of influence is:",o:["Expert and referent power built through competence and relationships","Coercive power","Legitimate positional power","Reward power alone"],a:0,e:"Influencing without authority relies on expert and referent power — demonstrated competence and trusted relationships built before you need them."},
+{cat:"people",dom:P,app:"General",q:"A key stakeholder is currently Resistant but needs to be Supportive. Which tool shows that gap?",o:["Stakeholder engagement assessment matrix (current vs desired)","Power/interest grid","RACI chart","Fishbone diagram"],a:0,e:"The stakeholder engagement assessment matrix plots Current (C) vs Desired (D) across unaware → resistant → neutral → supportive → leading. The gap drives your engagement actions."},
+{cat:"people",dom:P,app:"General",q:"The salience model classifies stakeholders by which three attributes?",o:["Power, legitimacy, urgency","Power, interest, influence","Power, proximity, attitude","Interest, urgency, impact"],a:0,e:"Salience uses power, legitimacy, and urgency, yielding seven classes of stakeholder."},
+{cat:"people",dom:P,app:"General",q:"Recognizing and regulating your own emotions falls under which emotional-intelligence competencies?",o:["Self-awareness and self-management (inbound)","Social awareness","Relationship management","Empathy"],a:0,e:"Goleman splits EI into inbound (self-awareness, self-management) and outbound (social awareness, relationship management) competencies."},
+{cat:"people",dom:P,app:"Hybrid",q:"A virtual team across several time zones is collaborating poorly. What is the BEST first improvement?",o:["Establish team working agreements and some overlapping hours","Require everyone to relocate to one time zone","Replace remote members with local hires","Stop all synchronous meetings"],a:0,e:"Shared ground rules and a window of overlap address the root cause. PMI favors enabling collaboration over heavy-handed restructuring."},
+{cat:"people",dom:P,app:"General",q:"Which conflict mode seeks a lasting solution that fully satisfies both parties?",o:["Collaborating / problem-solving","Compromising","Avoiding","Forcing"],a:0,e:"Collaborating (confronting the problem) is the only mode that pursues a true win-win; compromising means both sides give something up."},
+{cat:"people",dom:P,app:"General",q:"During execution you discover a stakeholder who was never identified. What do you do FIRST?",o:["Analyze them and update the stakeholder register and engagement plan","Ignore them — it is too late to add stakeholders","Escalate to cancel the project","Wait until closing to add them"],a:0,e:"Identify Stakeholders is iterative. Newly discovered stakeholders are analyzed and the register and engagement plan are updated immediately."},
+{cat:"people",dom:P,app:"General",q:"Helping a team member build a specific skill needed for their current work is best described as:",o:["Coaching","Mentoring","Directing","Delegating"],a:0,e:"Coaching targets specific current-performance skills; mentoring is broader, longer-term career development."},
+{cat:"people",dom:P,app:"General",q:"A sponsor pressures you to cut all testing to hit a date, which would risk quality and safety. Your BEST response is to:",o:["Explain the risks and impact, and recommend alternatives","Comply at once — the sponsor outranks you","Refuse and go over the sponsor's head first","Cut testing but note that you objected"],a:0,e:"PMI expects you to surface the impact and offer options. Silent compliance and unilateral escalation past the sponsor are both wrong first moves."},
+{cat:"people",dom:P,app:"General",q:"In principled (Fisher & Ury) negotiation, you should focus on:",o:["Interests, not positions","Positions, not interests","Winning the fixed pie","Only your BATNA"],a:0,e:"Separate the people from the problem and focus on underlying interests — ask why they want what they ask for — to find mutual-gain options."},
+{cat:"people",dom:P,app:"General",q:"Two parties haggle over a single fixed price with no added value exchanged. This is:",o:["Distributive (win-lose) bargaining","Integrative bargaining","Principled negotiation","A BATNA"],a:0,e:"Distributive bargaining splits a fixed pie. PMI prefers integrative (win-win) negotiation that expands value and preserves the relationship."},
+{cat:"people",dom:P,app:"General",q:"The team drafts working agreements at the start of an engagement. This primarily supports:",o:["Psychological safety and self-organization","Scope control","Earned value tracking","Change control"],a:0,e:"Team agreements create the shared norms and psychological safety a team needs to self-organize and perform."},
+{cat:"people",dom:P,app:"Hybrid",q:"A culturally diverse team has recurring miscommunication. The BEST approach is to:",o:["Build cultural awareness and create shared communication norms","Require everyone to adopt one culture's style","Minimize interaction to avoid friction","Communicate only in writing"],a:0,e:"Cultural competence plus agreed norms addresses the cause. Suppressing interaction or imposing one culture is counter to PMI's collaborative stance."},
+{cat:"people",dom:P,app:"Agile",q:"A new agile team over-commits and misses its goal every sprint. The BEST coaching move is to:",o:["Use the team's velocity to right-size the next commitment","Mandate overtime until they catch up","Penalize the misses to raise accountability","Add more scope to stretch the team"],a:0,e:"Empirical data (velocity) lets the team commit realistically. Inspect and adapt beats pressure and punishment."},
+{cat:"people",dom:P,app:"General",q:"Leadership versus management: inspiring people toward a vision relies mainly on:",o:["Leadership using personal and charismatic power","Management using positional power","Coercive power","Bureaucratic control"],a:0,e:"Management directs the known using positional power; leadership guides and influences toward a vision using personal power."},
+
+/* ----- PROCESS ----- */
+{cat:"process",dom:PR,app:"Predictive",q:"Mid-execution, a stakeholder requests a change to scope. What should you do FIRST?",o:["Submit a change request and run integrated change control","Implement it to keep the stakeholder happy","Reject it outright to protect the baseline","Add it to the next iteration without analysis"],a:0,e:"Perform Integrated Change Control is the spine of scope management. Every change is formally requested, assessed for impact, and approved or rejected — never implemented or rejected on the spot."},
+{cat:"process",dom:PR,app:"Predictive",q:"Formal acceptance of completed deliverables by the customer happens in which process?",o:["Validate Scope","Control Quality","Define Scope","Close Project"],a:0,e:"Validate Scope = customer sign-off on deliverables. Control Quality (internal correctness checks) must happen first."},
+{cat:"process",dom:PR,app:"Predictive",q:"Control Quality is primarily concerned with:",o:["Whether deliverables are correct and meet specifications","Whether the customer formally accepts deliverables","Whether benefits were realized","Whether a change is approved"],a:0,e:"Control Quality checks correctness and conformance internally; Validate Scope is the customer's acceptance. Confusing the two is a top exam trap."},
+{cat:"process",dom:PR,app:"Predictive",q:"The scope baseline consists of:",o:["Scope statement + WBS + WBS dictionary","Charter + WBS + schedule","Requirements + budget + schedule","WBS + schedule baseline + cost baseline"],a:0,e:"Memorize it — it appears verbatim: scope baseline = scope statement + WBS + WBS dictionary."},
+{cat:"process",dom:PR,app:"Predictive",q:"A work breakdown structure (WBS) decomposes:",o:["Deliverables, down to the work-package level","Activities","Risks","Resources"],a:0,e:"The WBS decomposes deliverables (nouns), not activities. Activities come later in schedule development."},
+{cat:"process",dom:PR,app:"Predictive",q:"The 100% rule of the WBS states that:",o:["The WBS includes all project and PM work and nothing more; children sum to the parent","Every resource must be 100% allocated","100% of risks must be mitigated","Quality must reach 100%"],a:0,e:"The 100% rule: child elements sum exactly to their parent, and the WBS captures all scope — internal, external, and project-management work — and no more."},
+{cat:"process",dom:PR,app:"Predictive",q:"On the critical path of a network diagram, total float is:",o:["Zero","Always positive","Equal to the project duration","Undefined"],a:0,e:"The critical path is the longest path and has zero total float — any slip there slips the project."},
+{cat:"process",dom:PR,app:"Predictive",q:"Performing activities in parallel that were planned in sequence, to shorten the schedule, is called:",o:["Fast tracking","Crashing","Resource leveling","Scope reduction"],a:0,e:"Fast tracking overlaps activities and adds risk/rework. Crashing adds resources and adds cost. Both are schedule-compression techniques."},
+{cat:"process",dom:PR,app:"Predictive",q:"Adding resources to critical-path activities to finish sooner, accepting higher cost, is:",o:["Crashing","Fast tracking","Leveling","Smoothing"],a:0,e:"Crashing shortens duration by adding resources, which raises cost. Fast tracking overlaps work and raises risk instead."},
+{cat:"process",dom:PR,app:"Predictive",q:"'The walls must be built before the roof' is an example of a:",o:["Mandatory (hard logic) dependency","Discretionary (soft logic) dependency","External dependency","Resource dependency"],a:0,e:"Mandatory dependencies are physically or contractually required. Discretionary (soft) dependencies are preferences — those are what you break when fast tracking."},
+{cat:"process",dom:PR,app:"Predictive",q:"'Wait three days for the concrete to cure before building on it' introduces a:",o:["Lag","Lead","Crash","Buffer"],a:0,e:"A lag delays the successor (finish-to-start plus 3 days). A lead accelerates it (finish-to-start minus X)."},
+{cat:"process",dom:PR,app:"Predictive",q:"A response that is executed only if a specific trigger occurs, funded from the contingency reserve, is a:",o:["Contingent response strategy","Fallback plan","Secondary risk","Residual risk"],a:0,e:"A contingent response (contingency plan) fires on a trigger. A fallback plan is what you use if the primary response fails."},
+{cat:"process",dom:PR,app:"Predictive",q:"Outsourcing to reduce a technical risk creates a new vendor-dependency risk. The new risk is a:",o:["Secondary risk","Residual risk","Trigger","Fallback"],a:0,e:"A secondary risk is created by implementing a risk response. A residual risk is what remains after the response and is accepted."},
+{cat:"process",dom:PR,app:"Predictive",q:"After implementing your risk responses, the small amount of risk you deliberately choose to accept is the:",o:["Residual risk","Secondary risk","Contingent risk","Management reserve"],a:0,e:"Residual risk remains after responses and is accepted. Secondary risk is newly introduced by a response."},
+{cat:"process",dom:PR,app:"Predictive",q:"Purchasing insurance to deal with a threat is which risk response strategy?",o:["Transfer","Mitigate","Avoid","Accept"],a:0,e:"Transfer shifts the impact (and ownership of the response) to a third party, e.g., insurance or a fixed-price contract. Mitigate reduces probability/impact."},
+{cat:"process",dom:PR,app:"Predictive",q:"To guarantee that a positive opportunity is realized by removing all uncertainty, you would:",o:["Exploit it","Enhance it","Share it","Accept it"],a:0,e:"Exploit (opportunity) mirrors Avoid (threat): make the outcome certain. Enhance increases probability/impact; share brings in a partner."},
+{cat:"process",dom:PR,app:"Predictive",q:"Contingency reserves are set aside to handle:",o:["Known (identified) risks","Unknown-unknowns","Approved scope changes","Profit margin"],a:0,e:"Contingency reserves cover identified risks and are part of the cost baseline. Management reserves cover unknown-unknowns and sit outside the baseline."},
+{cat:"process",dom:PR,app:"Predictive",q:"Management reserves are:",o:["For unknown-unknowns and require management approval to use","For known risks within the PM's control","Spent at the PM's discretion","Part of the cost baseline"],a:0,e:"Management reserves cover unforeseeable work, sit outside the cost baseline, and need management approval to access."},
+{cat:"process",dom:PR,app:"Predictive",q:"The project is cancelled before completion. What must still be done?",o:["Run the Close Project or Phase process","Nothing — simply stop the work","Skip closing since there is no deliverable","Only release the team"],a:0,e:"Closing happens regardless of why a project ends — to document reasons, transfer any completed work, and capture lessons learned."},
+{cat:"process",dom:PR,app:"Hybrid",q:"When should lessons learned be captured?",o:["Throughout the project","Only at closing","Only when something goes wrong","Only by the PMO"],a:0,e:"Manage Project Knowledge runs throughout the project; the lessons-learned register is updated continuously, not just at the end."},
+{cat:"process",dom:PR,app:"Predictive",q:"A phase gate (stage gate) is:",o:["A review that compares performance against the business case before continuing","A milestone marking a finished deliverable","A formal change request","A risk trigger"],a:0,e:"At a phase gate the project is compared to the business case, charter, and benefits plan to decide whether to continue, change, or stop."},
+{cat:"process",dom:PR,app:"Hybrid",q:"Planning near-term work in detail while leaving later work at a high level is:",o:["Rolling wave planning (progressive elaboration)","Analogous estimating","Re-baselining","Gold plating"],a:0,e:"Rolling wave planning elaborates detail progressively as more becomes known — useful in both predictive and hybrid work."},
+{cat:"process",dom:PR,app:"Predictive",q:"A defect is found during Control Quality, before the customer review. The correct sequence is to:",o:["Fix it in Control Quality, then take the deliverable to Validate Scope","Send it to the customer and let them reject it","Submit a change request before doing anything","Accept it as a residual risk"],a:0,e:"Control Quality (internal correctness) precedes Validate Scope (customer acceptance). You correct defects before presenting work for sign-off."},
+{cat:"process",dom:PR,app:"Predictive",q:"The scope is poorly defined and the work is exploratory. Which contract type is MOST appropriate?",o:["Cost-reimbursable (e.g., CPFF)","Firm fixed price (FFP)","Fixed price incentive fee (FPIF)","Fixed price with economic adjustment (FP-EPA)"],a:0,e:"Poorly defined scope → cost-reimbursable, where the buyer carries more risk. The better the scope is defined, the more you can move toward fixed price."},
+{cat:"process",dom:PR,app:"Predictive",q:"Which contract type places the MOST risk on the seller?",o:["Firm Fixed Price (FFP)","Cost Plus Fixed Fee (CPFF)","Time and Materials (T&M)","Cost Plus Award Fee (CPAF)"],a:0,e:"On the seller-to-buyer risk spectrum (FFP → FPIF → FP-EPA → T&M → CPIF → CPAF → CPFF → CPPC), FFP puts the most risk on the seller."},
+{cat:"process",dom:PR,app:"Predictive",q:"A Time & Materials (T&M) contract is best suited to:",o:["Work whose scope or quantity cannot be defined upfront, like staff augmentation","Large builds with fully fixed scope","Situations requiring maximum seller risk","Projects where the buyer wants a single fixed price"],a:0,e:"T&M is a hybrid used for small or undefined efforts and staff augmentation, where neither pure fixed-price nor full cost-reimbursement fits."},
+{cat:"process",dom:PR,app:"Predictive",q:"A control chart shows seven consecutive points on one side of the mean. This indicates:",o:["An out-of-control process (rule of seven) — investigate the assignable cause","A stable, in-control process","Acceptable common-cause variation","That the process must be re-baselined"],a:0,e:"The rule of seven: seven points in a row on one side of the mean signals a non-random (assignable) cause, even if all points are within control limits."},
+{cat:"process",dom:PR,app:"Predictive",q:"A Pareto analysis in quality management helps you:",o:["Focus on the ~20% of causes creating ~80% of the problems","Treat every defect as equally important","Inspect 100% of output","Eliminate all variation"],a:0,e:"The Pareto principle directs effort to the vital few causes responsible for most defects."},
+{cat:"process",dom:PR,app:"Predictive",q:"An Ishikawa (fishbone) diagram is used to:",o:["Identify the root causes of a problem","Prioritize defects by frequency","Show the project schedule","Track cost performance"],a:0,e:"The fishbone / cause-and-effect diagram organizes potential root causes of a problem for analysis."},
+{cat:"process",dom:PR,app:"Predictive",q:"A CPI of 0.85 means the project is:",o:["Over budget — earning $0.85 of value per $1 spent","Under budget","Ahead of schedule","Exactly on budget"],a:0,e:"CPI below 1.0 means you are over budget (getting less value than you spend). CPI measures cost efficiency; SPI measures schedule efficiency."},
+{cat:"process",dom:PR,app:"Predictive",q:"An SPI of 1.1 means the project is:",o:["Ahead of schedule","Behind schedule","Over budget","Under budget"],a:0,e:"SPI above 1.0 means you are ahead of schedule (earning value faster than planned)."},
+
+/* ----- BUSINESS ENVIRONMENT ----- */
+{cat:"business",dom:B,app:"General",q:"On the 2026 exam, risk management is tested primarily under which domain?",o:["Business Environment","People","Process","It is no longer tested"],a:0,e:"The 2026 outline moved risk into Business Environment, which more than tripled in weight (now 26%) and is the single most heavily tested subject."},
+{cat:"business",dom:B,app:"General",q:"Benefits realization is typically measured:",o:["During and especially after delivery, over time","Only at project initiation","Only at closing, by the project manager","It is never formally measured"],a:0,e:"Benefits often accrue after the project ends and are tracked by the business/sponsor against the benefits management plan."},
+{cat:"business",dom:B,app:"General",q:"A new regulation lands mid-project and affects your deliverables. What should you do FIRST?",o:["Assess the compliance impact and adjust the plan or escalate through governance","Ignore it until an audit forces the issue","Cancel the project","Have the team quietly work around it"],a:0,e:"Compliance changes are assessed for impact and handled through governance and change control. Compliance is non-negotiable, not something to work around."},
+{cat:"business",dom:B,app:"General",q:"The business case primarily establishes:",o:["Why the project exists and the value it will deliver","The detailed project schedule","The work breakdown structure","Team role assignments"],a:0,e:"The business case documents justification and expected value — the 'why.' It anchors go/continue/stop decisions at phase gates."},
+{cat:"business",dom:B,app:"General",q:"Organizational change management (OCM) focuses primarily on:",o:["Helping people adopt and transition to the new way of working","Controlling changes to project scope","Source-code version control","Maintaining the risk register"],a:0,e:"OCM is about adoption — the human side of change. It is distinct from Perform Integrated Change Control, which governs scope changes."},
+{cat:"business",dom:B,app:"General",q:"A deliverable is technically complete, but end users are not adopting it. This indicates a gap in:",o:["Organizational change management and benefits realization","Control Quality","Validate Scope","Procurement"],a:0,e:"Output without adoption delivers no value. The gap is in change management and benefits realization, not in building the deliverable."},
+{cat:"business",dom:B,app:"General",q:"How do sustainability and ESG considerations enter PMP-level project decisions?",o:["As factors weighed in value and trade-off decisions","They are irrelevant to project management","They are solely the legal department's concern","They matter only at project closing"],a:0,e:"The 2026 outline adds sustainability, ESG, and value delivery as explicit factors in evidence-based project decisions."},
+{cat:"business",dom:B,app:"General",q:"What is PMI's stance on using AI tools to draft project artifacts?",o:["A useful aid, but outputs must be verified and the PM remains accountable","It is never acceptable","It fully replaces the project manager","It should be used only for writing code"],a:0,e:"AI in project management is now exam subject matter. It can assist, but human judgment, verification, and accountability remain with the PM."},
+{cat:"business",dom:B,app:"General",q:"A mandatory legal/regulatory requirement differs from a quality 'nice-to-have' because it is:",o:["Compliance — non-negotiable and must be met","Gold plating","Optional scope","A stretch goal"],a:0,e:"Compliance requirements are obligations, not options. Adding unrequested extras beyond requirements is gold plating, which PMI discourages."},
+{cat:"business",dom:B,app:"General",q:"Project governance provides:",o:["The framework of authority, decision rights, and oversight","The team's daily task list","The code repository","The sprint retrospective"],a:0,e:"Governance defines who decides what, escalation paths, and oversight — the structure within which the project operates."},
+{cat:"business",dom:B,app:"General",q:"A steering committee wants assurance the project aligns with strategy. You demonstrate this with the:",o:["Business case and benefits management plan","WBS dictionary","RACI chart","Burndown chart"],a:0,e:"Strategic alignment and value are shown through the business case and benefits plan, not through execution-level artifacts."},
+{cat:"business",dom:B,app:"General",q:"The PMBOK emphasis on 'value delivery' means:",o:["Delivering outcomes and benefits, not just outputs","Completing tasks regardless of whether they create value","Maximizing documentation","Maximizing scope"],a:0,e:"Value delivery shifts focus from producing outputs to realizing outcomes and benefits for the organization."},
+{cat:"business",dom:B,app:"General",q:"A market shift threatens the project's expected benefits. Who should you engage?",o:["The sponsor and governance, to reassess the business case","No one — keep building to plan","Only the development team","The PMO, after the project closes"],a:0,e:"External-environment threats to benefits are escalated to the sponsor/governance so the business case can be re-evaluated."},
+{cat:"business",dom:B,app:"General",q:"You discover you have a personal conflict of interest on a vendor decision. The correct action is to:",o:["Disclose it to the affected stakeholders","Conceal it to avoid delay","Resign from the project immediately","Ignore it if the amounts are small"],a:0,e:"PMI's Code of Ethics requires proactively disclosing conflicts of interest to affected parties."},
+{cat:"business",dom:B,app:"General",q:"A completed deliverable meets scope but creates a safety hazard. Your priority is to:",o:["Address the safety issue immediately, then analyze","Ship it to meet the committed date","Log it and handle it in the next phase","Ask the customer to formally accept it as-is"],a:0,e:"Imminent safety, legal, or compliance threats are the exception to 'assess first' — you act at once to stop the harm, then analyze."},
+{cat:"business",dom:B,app:"General",q:"Kaizen, applied in the business environment, refers to:",o:["Incremental, ongoing process improvement","One large improvement delivered at closing","Only agile retrospectives","Continuously expanding scope"],a:0,e:"Kaizen is continuous, incremental improvement embedded in how the organization works."},
+{cat:"business",dom:B,app:"General",q:"After a project transitions to operations, who typically owns realizing the benefits?",o:["The sponsor or business, not the project manager","The project manager, indefinitely","The vendor","The PMO alone"],a:0,e:"The PM delivers the capability; the sponsor/business owns and measures the ongoing benefits after transition."},
+{cat:"business",dom:B,app:"Predictive",q:"A project supports a fixed regulatory deadline. If scope and schedule conflict, what usually cannot move?",o:["The compliance deadline","The quality standards","The regulation itself","Worker safety"],a:0,e:"Regulatory deadlines are external constraints. You adjust scope, resources, or approach around them — not safety or the law."},
+{cat:"business",dom:B,app:"General",q:"Between two candidate projects, which net present value (NPV) do you choose?",o:["The higher NPV","The lower NPV","The one with the longer payback period","The one with the lower IRR"],a:0,e:"Higher NPV means more value created in today's terms. NPV, IRR, BCR, and payback are financial selection metrics in the business environment."},
+
+/* ----- AGILE & HYBRID ----- */
+{cat:"agile",dom:PR,app:"Agile",q:"The 2020 Scrum Guide's guidance on Scrum team size is:",o:["Ten or fewer people, cross-functional","Exactly seven plus or minus two","Fifteen to twenty people","No limit"],a:0,e:"A Scrum Team is typically 10 or fewer, cross-functional, with no sub-teams or hierarchies."},
+{cat:"agile",dom:PR,app:"Agile",q:"Which of these is NOT one of the five Scrum events?",o:["Backlog refinement","Sprint Planning","Daily Scrum","Sprint Retrospective"],a:0,e:"Backlog refinement is an ongoing activity (about 10% of capacity), not a timeboxed event. The five events are the Sprint, Sprint Planning, Daily Scrum, Sprint Review, and Retrospective."},
+{cat:"agile",dom:P,app:"Agile",q:"The three Scrum accountabilities are:",o:["Product Owner, Scrum Master, and Developers","Project Manager, Business Analyst, and Developers","Product Owner, Project Manager, and Team","Scrum Master, Project Manager, and Sponsor"],a:0,e:"Scrum defines exactly three accountabilities: Product Owner, Scrum Master, and Developers. There is no 'project manager' role in Scrum."},
+{cat:"agile",dom:PR,app:"Agile",q:"Mid-sprint, a stakeholder demands new work that would endanger the Sprint Goal. The correct response is to:",o:["Decline the change to the current sprint and discuss it with the PO for the backlog","Add it immediately to satisfy the stakeholder","Cancel the sprint","Bypass the Product Owner"],a:0,e:"No changes are made that endanger the Sprint Goal. Scope can be clarified with the PO, and new work enters the backlog for future sprints."},
+{cat:"agile",dom:PR,app:"Agile",q:"By Little's Law, cycle time equals:",o:["WIP ÷ throughput","WIP × throughput","throughput ÷ WIP","WIP + throughput"],a:0,e:"Little's Law: WIP = throughput × cycle time, so cycle time = WIP ÷ throughput. To cut cycle time you reduce WIP or raise throughput."},
+{cat:"agile",dom:PR,app:"Agile",q:"A Kanban column reaches its WIP limit. The team should:",o:["Stop starting and start finishing — help clear the bottleneck","Immediately raise the WIP limit","Start new work in a different column","Ignore the limit and keep pulling"],a:0,e:"A column at its WIP limit means no new work starts there; the team swarms to finish what is in flight. 'Stop starting, start finishing.'"},
+{cat:"agile",dom:PR,app:"Agile",q:"Work arrives unpredictably, but the team wants to keep some Scrum ceremonies. The best fit is:",o:["Scrumban","Pure Scrum","Waterfall","SAFe portfolio layer"],a:0,e:"Scrumban blends Scrum's ceremonies with Kanban's pull-based flow — the standard answer when work arrives continuously."},
+{cat:"agile",dom:PR,app:"Agile",q:"Agile teams most commonly estimate using:",o:["Story points (relative sizing)","Only exact hours","Only cost figures","Only function points"],a:0,e:"Relative estimation with story points is the common agile approach; velocity then forecasts throughput."},
+{cat:"agile",dom:PR,app:"Agile",q:"Velocity is best defined as:",o:["The average story points a team completes per iteration","The hours the team works per week","The number of defects per sprint","The team's cycle time"],a:0,e:"Velocity is completed story points per iteration, used for forecasting — not a productivity target to maximize."},
+{cat:"agile",dom:PR,app:"Agile",q:"In agile, the 'iron triangle' is typically inverted so that:",o:["Time and cost are fixed and scope varies","Scope is fixed and time and cost vary","All three are fixed","Nothing is fixed"],a:0,e:"In predictive, scope is fixed and time/cost flex. In agile, time and cost are fixed and scope flexes to fit."},
+{cat:"agile",dom:PR,app:"Hybrid",q:"A customer insists an agile team commit to fixed scope, fixed date, AND fixed price. The BEST response is to:",o:["Educate them on the trade-offs and consider a hybrid or phased contract","Agree to all three constraints","Refuse the project outright","Quietly switch to pure predictive"],a:0,e:"Fixing all three contradicts agile's variable-scope model. Educate the customer and tailor the contract (e.g., phased or incremental) rather than silently changing approach."},
+{cat:"agile",dom:PR,app:"Agile",q:"Scrum of Scrums is used to:",o:["Coordinate dependencies across multiple teams","Replace the Daily Scrum within one team","Scale a single team's capacity","Run portfolio-level planning"],a:0,e:"Scrum of Scrums is the simplest scaling pattern: representatives from each team meet to coordinate cross-team dependencies."},
+{cat:"agile",dom:P,app:"Agile",q:"The Product Owner is primarily accountable for:",o:["Maximizing product value and ordering the backlog","Removing the team's impediments","Writing the production code","Facilitating the retrospective"],a:0,e:"The PO maximizes value and owns backlog ordering. Removing impediments and facilitating belong to the Scrum Master."},
+{cat:"agile",dom:P,app:"Agile",q:"The Scrum Master's main role is to:",o:["Serve the team, remove impediments, and coach","Assign tasks and track individual hours","Own and prioritize the backlog","Approve the project budget"],a:0,e:"The Scrum Master is a servant leader: coaching, facilitating, and removing impediments — never assigning tasks or directing the team."},
+{cat:"agile",dom:PR,app:"Agile",q:"A sprint burndown trending above the ideal line means the team is:",o:["Behind — more work remains than planned","Ahead of plan","Reducing scope","Exactly on track"],a:0,e:"On a burndown, the line above ideal means remaining work is higher than planned, so the team is behind."},
+{cat:"agile",dom:PR,app:"Agile",q:"A burnup chart is particularly useful because it can show:",o:["Scope changes alongside completed work","Only the remaining work","Defect trends","Cost performance"],a:0,e:"A burnup plots completed work against a scope line, making scope growth visible — something a burndown hides."},
+{cat:"agile",dom:PR,app:"Hybrid",q:"Which best captures the PMBOK principle of tailoring?",o:["Adapt the approach to the context — 'it depends'","Always use agile","Always use predictive","Never change the chosen method"],a:0,e:"Tailoring is a named principle and a recurring right answer: choose and adapt the approach based on the project's context."},
+{cat:"agile",dom:PR,app:"Agile",q:"A Definition of Done (DoD) exists to:",o:["Set a shared, consistent quality bar for every increment","Fix the length of each sprint","Define backlog order","Set the team size"],a:0,e:"The DoD is the team's shared standard for when work is truly complete, ensuring consistent increment quality."},
+{cat:"agile",dom:PR,app:"Hybrid",q:"A project runs discovery with agile sprints, then a regulated rollout predictively. This hybrid is appropriate because:",o:["Different parts of the project suit different approaches","Hybrid is always the best choice","Agile can never be used in regulated work","Predictive is inherently faster"],a:0,e:"Hybrid fits when conditions differ across parts of the same project — the most common situation on the 2026 exam."},
+{cat:"agile",dom:PR,app:"Agile",q:"The Daily Scrum is timeboxed to:",o:["15 minutes","30 minutes","1 hour","No fixed limit"],a:0,e:"The Daily Scrum is a 15-minute event for the Developers to inspect progress toward the Sprint Goal and adapt the plan."},
+{cat:"agile",dom:P,app:"Agile",q:"The primary purpose of the Sprint Retrospective is to:",o:["Inspect and improve the team's process and ways of working","Demonstrate the increment to stakeholders","Plan the next sprint's scope","Refine the product backlog"],a:0,e:"The Retrospective is about the team improving how it works. The Review (different event) demonstrates the increment to stakeholders."},
+{cat:"agile",dom:P,app:"Agile",q:"The Sprint Review exists to:",o:["Inspect the increment with stakeholders and adapt the backlog","Improve the team's internal process","Hold the daily sync","Estimate upcoming stories"],a:0,e:"The Review inspects the product increment with stakeholders and adapts the backlog based on feedback."},
+{cat:"agile",dom:PR,app:"Agile",q:"Pair programming, test-driven development, and continuous integration are practices of:",o:["Extreme Programming (XP)","SAFe","Portfolio Kanban","Scrum of Scrums"],a:0,e:"XP's engineering practices include pair programming, TDD, CI, refactoring, collective ownership, and sustainable pace."},
+
+/* ----- FORMULAS ----- */
+{cat:"formula",dom:PR,app:"Predictive",q:"EV = $40,000 and AC = $50,000. What is the cost variance (CV)?",o:["−$10,000","+$10,000","$90,000","−$50,000"],a:0,e:"CV = EV − AC = 40,000 − 50,000 = −$10,000. Negative CV means over budget."},
+{cat:"formula",dom:PR,app:"Predictive",q:"EV = $40,000 and PV = $50,000. What is the schedule variance (SV)?",o:["−$10,000","+$10,000","0.8","−$50,000"],a:0,e:"SV = EV − PV = 40,000 − 50,000 = −$10,000. Negative SV means behind schedule. (0.8 is the SPI, a common trap — SV is a dollar amount, not a ratio.)"},
+{cat:"formula",dom:PR,app:"Predictive",q:"EV = $40,000 and AC = $50,000. What is the CPI?",o:["0.8","1.25","1.0","0.9"],a:0,e:"CPI = EV ÷ AC = 40,000 ÷ 50,000 = 0.8. Below 1.0 means over budget. (EV is always the numerator of both indices.)"},
+{cat:"formula",dom:PR,app:"Predictive",q:"EV = $40,000 and PV = $50,000. What is the SPI?",o:["0.8","1.25","1.0","0.9"],a:0,e:"SPI = EV ÷ PV = 40,000 ÷ 50,000 = 0.8. Below 1.0 means behind schedule."},
+{cat:"formula",dom:PR,app:"Predictive",q:"BAC = $100,000 and CPI = 0.8. What is the EAC assuming current performance continues (typical)?",o:["$125,000","$80,000","$100,000","$120,000"],a:0,e:"Typical EAC = BAC ÷ CPI = 100,000 ÷ 0.8 = $125,000."},
+{cat:"formula",dom:PR,app:"Predictive",q:"EAC = $125,000 and AC = $50,000. What is the estimate to complete (ETC)?",o:["$75,000","$175,000","$25,000","$50,000"],a:0,e:"ETC = EAC − AC = 125,000 − 50,000 = $75,000."},
+{cat:"formula",dom:PR,app:"Predictive",q:"BAC = $100,000 and EAC = $125,000. What is the variance at completion (VAC)?",o:["−$25,000","+$25,000","$225,000","$0"],a:0,e:"VAC = BAC − EAC = 100,000 − 125,000 = −$25,000. Negative VAC forecasts an overrun."},
+{cat:"formula",dom:PR,app:"Predictive",q:"BAC = $100,000, EV = $40,000, AC = $50,000. What is the TCPI to still meet the BAC?",o:["1.2","0.8","1.0","0.6"],a:0,e:"TCPI = (BAC − EV) ÷ (BAC − AC) = (100,000 − 40,000) ÷ (100,000 − 50,000) = 60,000 ÷ 50,000 = 1.2. You must become more efficient to hit the budget."},
+{cat:"formula",dom:P,app:"General",q:"A team grows from 5 to 8 people. How many ADDITIONAL communication channels are created?",o:["18","28","10","13"],a:0,e:"Channels = n(n−1)÷2. For 8: 28; for 5: 10. Additional = 28 − 10 = 18. The trap is forgetting to subtract the original channels."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Optimistic = 4, Most likely = 10, Pessimistic = 22. What is the PERT (beta) expected duration?",o:["11","12","10","13"],a:0,e:"PERT = (O + 4M + P) ÷ 6 = (4 + 40 + 22) ÷ 6 = 66 ÷ 6 = 11."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Optimistic = 4 and Pessimistic = 22. What is the PERT standard deviation?",o:["3","18","6","9"],a:0,e:"SD = (P − O) ÷ 6 = (22 − 4) ÷ 6 = 18 ÷ 6 = 3."},
+{cat:"formula",dom:PR,app:"Predictive",q:"A risk has a 30% probability and a −$10,000 impact. What is its expected monetary value (EMV)?",o:["−$3,000","−$10,000","−$30,000","+$3,000"],a:0,e:"EMV = probability × impact = 0.30 × (−10,000) = −$3,000. EMV is used in decision-tree analysis."},
+{cat:"formula",dom:PR,app:"Agile",q:"A team's throughput is 5 items per day and its WIP is 20 items. What is the average cycle time?",o:["4 days","100 days","0.25 days","25 days"],a:0,e:"By Little's Law, cycle time = WIP ÷ throughput = 20 ÷ 5 = 4 days."},
+{cat:"formula",dom:PR,app:"Predictive",q:"What is the accuracy range of a rough order of magnitude (ROM) estimate?",o:["−25% to +75%","−5% to +10%","−10% to +25%","±50%"],a:0,e:"ROM is −25% to +75%. A budget estimate is −10% to +25%; a definitive estimate is −5% to +10%."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Which EAC formula assumes the current cost variance is atypical and will NOT continue?",o:["EAC = AC + (BAC − EV)","EAC = BAC ÷ CPI","EAC = AC + (BAC − EV) ÷ (CPI × SPI)","EAC = BAC × CPI"],a:0,e:"EAC = AC + (BAC − EV) assumes remaining work runs at the planned rate (variance was a one-off). BAC ÷ CPI assumes the variance continues (typical)."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Using parametric estimating at $50 per square foot for 2,000 square feet, the estimate is:",o:["$100,000","$52,000","$25,000","$2,000"],a:0,e:"Parametric = unit rate × quantity = $50 × 2,000 = $100,000. It scales a statistical relationship between a unit and a cost/duration."},
+{cat:"formula",dom:B,app:"General",q:"Choosing between two projects by benefit-cost ratio (BCR), you prefer:",o:["The higher BCR (above 1 means benefits exceed costs)","The lower BCR","The one with BCR below 1","BCR is irrelevant to selection"],a:0,e:"A BCR above 1.0 means benefits outweigh costs; higher is better. BCR sits with NPV, IRR, and payback among financial selection metrics."},
+{cat:"formula",dom:PR,app:"Predictive",q:"The point of total assumption (PTA) is a concept associated with which contract type?",o:["Fixed Price Incentive Fee (FPIF)","Cost Plus Fixed Fee (CPFF)","Time & Materials (T&M)","Firm Fixed Price (FFP)"],a:0,e:"PTA applies to FPIF contracts — above the PTA, the seller bears all additional cost."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Which expression correctly defines earned value (EV)?",o:["EV = percent complete × BAC","EV = AC × CPI","EV = PV − AC","EV = BAC ÷ SPI"],a:0,e:"EV is the budgeted value of the work actually completed: percent complete × BAC."},
+
+/* ===== PEOPLE (added) ===== */
+{cat:"people",dom:P,app:"General",q:"A minor disagreement flares up over a trivial point and is distracting the team from a deadline. Which conflict mode is a reasonable short-term choice?",o:["Avoiding / withdrawing until it cools and the deadline passes","Forcing an immediate decision","Collaborating on a full solution now","Escalating to the sponsor"],a:0,e:"Avoiding can be appropriate for trivial issues or when emotions need to cool, as a temporary measure. It is a poor choice for important, lasting conflicts."},
+{cat:"people",dom:P,app:"General",q:"Two parties each give up something to reach a quick settlement that fully satisfies neither. This describes:",o:["Compromising (lose-lose)","Collaborating (win-win)","Forcing","Smoothing"],a:0,e:"Compromising means both sides concede, so neither is fully satisfied. PMI prefers collaborating when time allows."},
+{cat:"people",dom:P,app:"General",q:"According to most project-management sources, the single most common source of conflict on projects is:",o:["Schedules and competing priorities","Personality clashes","Cost","Technical opinions"],a:0,e:"Schedules and resource/priority conflicts top the list; personality clashes are among the least common root causes."},
+{cat:"people",dom:P,app:"Agile",q:"A team reaches a stage where it works smoothly, trusts one another, and needs little intervention. In Tuckman's model this is:",o:["Performing","Norming","Storming","Forming"],a:0,e:"Performing is the high-output stage where the team is interdependent and largely self-managing. The leader can be most hands-off here."},
+{cat:"people",dom:P,app:"General",q:"A team disbands after the project delivers and members are reassigned. This Tuckman stage is:",o:["Adjourning","Performing","Norming","Storming"],a:0,e:"Adjourning (mourning) is the release of the team once the work is complete."},
+{cat:"people",dom:P,app:"General",q:"McClelland's theory says a person driven primarily by the need for achievement is best motivated by:",o:["Challenging but attainable goals with clear feedback","Large teams to lead","Social approval and belonging","Authority over others"],a:0,e:"High need-for-achievement people want moderately challenging goals and concrete feedback; nPow seeks influence, nAff seeks belonging."},
+{cat:"people",dom:P,app:"General",q:"Vroom's expectancy theory holds that motivation is highest when a person believes:",o:["Effort leads to performance, which leads to a valued reward","Rewards are equal for everyone","Work itself is inherently unpleasant","Managers must closely control them"],a:0,e:"Expectancy theory links effort → performance → reward, and the reward must be valued (valence) for motivation to hold."},
+{cat:"people",dom:P,app:"General",q:"Ouchi's Theory Z emphasizes motivation through:",o:["Long-term employment, loyalty, and consensus involvement","Strict control and supervision","Purely financial incentives","Minimal management of a self-driven workforce"],a:0,e:"Theory Z stresses job stability, collective decision-making, and whole-person concern to build loyalty and productivity."},
+{cat:"people",dom:P,app:"General",q:"A long-overdue pay raise finally arrives, but the lift in satisfaction fades within weeks. In Herzberg's terms, salary is a:",o:["Hygiene factor","Motivator","Self-actualization need","Referent reward"],a:0,e:"Salary is a hygiene factor: its absence causes dissatisfaction, but its presence does not create lasting motivation."},
+{cat:"people",dom:P,app:"Agile",q:"Daniel Pink argues knowledge workers are driven mainly by:",o:["Autonomy, mastery, and purpose","Money above all","Fear of consequences","Close supervision"],a:0,e:"Pink's intrinsic-motivation model (autonomy, mastery, purpose) aligns well with agile, self-organizing teams."},
+{cat:"people",dom:P,app:"General",q:"A leader who motivates mainly through rewards for meeting targets and corrections for missing them is using which style?",o:["Transactional leadership","Transformational leadership","Servant leadership","Laissez-faire leadership"],a:0,e:"Transactional leadership runs on exchanges — rewards and corrective actions tied to performance against defined goals."},
+{cat:"people",dom:P,app:"General",q:"A leader who inspires through vision, intellectual stimulation, and individual attention exhibits:",o:["Transformational leadership","Transactional leadership","Autocratic leadership","Bureaucratic leadership"],a:0,e:"Transformational leaders use the four I's: idealized influence, inspirational motivation, intellectual stimulation, and individualized consideration."},
+{cat:"people",dom:P,app:"General",q:"A manager gives a capable, experienced team full freedom and steps back entirely. This is:",o:["Laissez-faire leadership","Directive leadership","Coercive leadership","Transactional leadership"],a:0,e:"Laissez-faire delegates decisions to the team. It suits mature, expert teams but can fail with teams needing direction."},
+{cat:"people",dom:P,app:"General",q:"Hersey and Blanchard's situational leadership says the leader should:",o:["Adapt style to the team's competence and commitment for the task","Always use the same proven style","Lead democratically in all cases","Delegate everything from day one"],a:0,e:"Situational leadership flexes between directing, coaching, supporting, and delegating based on follower readiness."},
+{cat:"people",dom:P,app:"General",q:"You can approve bonuses and time off for your team. This is which form of power?",o:["Reward power","Coercive power","Expert power","Referent power"],a:0,e:"Reward power comes from the ability to grant benefits. It is positional and can lose force once rewards run out."},
+{cat:"people",dom:P,app:"General",q:"Relying mainly on the ability to punish or threaten team members tends to:",o:["Damage morale and is the least desirable power base","Build strong long-term loyalty","Increase intrinsic motivation","Be PMI's preferred approach"],a:0,e:"Coercive (penalty) power can force short-term compliance but erodes trust and engagement; PMI favors expert and referent power."},
+{cat:"people",dom:P,app:"General",q:"Team members follow you because they respect and admire you personally. This is:",o:["Referent power","Legitimate power","Reward power","Coercive power"],a:0,e:"Referent power flows from respect, trust, and charisma. With expert power, it is the most effective in low-authority settings."},
+{cat:"people",dom:P,app:"General",q:"In emotional intelligence, accurately sensing what others are feeling is:",o:["Empathy (an outbound / social competency)","Self-awareness","Self-regulation","Motivation"],a:0,e:"Empathy and social skills are outbound competencies (managing relationships); self-awareness and self-management are inbound."},
+{cat:"people",dom:P,app:"General",q:"A manager feels angry at a tense meeting but pauses and responds calmly instead of reacting. This demonstrates:",o:["Self-regulation","Empathy","Social skills","Motivation"],a:0,e:"Self-regulation (self-management) is controlling one's own disruptive emotions and impulses."},
+{cat:"people",dom:P,app:"General",q:"The overlap between what the buyer will pay and what the seller will accept is the:",o:["ZOPA (zone of possible agreement)","BATNA","Reservation point","Anchor"],a:0,e:"The ZOPA is the range where a deal is possible. If the parties' acceptable ranges do not overlap, there is no ZOPA."},
+{cat:"people",dom:P,app:"General",q:"Albert Mehrabian's research suggests that in emotionally charged communication, the largest share of meaning is carried by:",o:["Body language and tone, far more than the words","The exact words chosen","Written documentation","The communication channel"],a:0,e:"The oft-cited 55/38/7 split (body language/tone/words) underscores why face-to-face communication is richest for sensitive topics."},
+{cat:"people",dom:P,app:"General",q:"Restating what a speaker said to confirm understanding is a core technique of:",o:["Active listening","Broadcasting","Push communication","Formal reporting"],a:0,e:"Active listening — paraphrasing, clarifying, and acknowledging — confirms understanding and builds trust."},
+{cat:"people",dom:P,app:"General",q:"Posting status to a shared dashboard that stakeholders check when they choose is which communication method?",o:["Pull communication","Push communication","Interactive communication","Mass communication"],a:0,e:"Pull communication lets recipients access information at will (portals, wikis, dashboards). Push sends to specific recipients; interactive is real-time exchange."},
+{cat:"people",dom:P,app:"General",q:"A one-on-one conversation or a video call is an example of which communication method?",o:["Interactive communication","Pull communication","Push communication","Asynchronous communication"],a:0,e:"Interactive communication is a real-time, multidirectional exchange — the most effective for reaching shared understanding."},
+{cat:"people",dom:P,app:"General",q:"Jargon, cultural differences, and distractions in a conversation are examples of communication:",o:["Noise / barriers that distort the message","Feedback","Encoding","Channels"],a:0,e:"Noise is anything that interferes with transmitting or understanding the message; the sender should confirm the message was understood."},
+{cat:"people",dom:P,app:"General",q:"A stakeholder is aware of the project but neither supports nor opposes it. On the engagement scale this is:",o:["Neutral","Resistant","Supportive","Leading"],a:0,e:"The engagement levels run unaware → resistant → neutral → supportive → leading. Neutral means aware but not yet engaged."},
+{cat:"people",dom:P,app:"General",q:"A powerful stakeholder is actively resisting the project. The BEST approach is to:",o:["Meet them to understand concerns and address root causes","Avoid them to reduce friction","Escalate to have them removed","Proceed and hope they disengage"],a:0,e:"Engage resistant high-power stakeholders directly to understand and address concerns; ignoring or bypassing them raises risk."},
+{cat:"people",dom:P,app:"General",q:"On a RACI chart, how many people should be Accountable for a given activity?",o:["Exactly one","At least two","As many as are involved","None — it is optional"],a:0,e:"There is exactly one Accountable per activity (the single owner), though there may be several Responsible, Consulted, and Informed."},
+{cat:"people",dom:P,app:"Agile",q:"A newly formed team argues over how to run meetings and make decisions. The BEST first step is to:",o:["Facilitate the team in creating a team charter / ground rules","Assign roles and rules yourself","Wait for the conflict to resolve itself","Report the friction to management"],a:0,e:"A team-built charter with shared ground rules establishes norms and reduces process conflict. Teams own and enforce their own agreements."},
+{cat:"people",dom:P,app:"General",q:"The most effective form of recognition and rewards systems:",o:["Reinforce behaviors the team values and can achieve","Reward only one 'top performer' each period","Are purely financial","Are given secretly"],a:0,e:"Rewards should be achievable, valued by recipients, and tied to desired behaviors; win-lose schemes can harm team cohesion."},
+{cat:"people",dom:P,app:"Agile",q:"An agile coach guiding a novice team closely at first, then stepping back as they mature, is applying:",o:["Shu-Ha-Ri","The Pareto principle","Little's Law","Theory X"],a:0,e:"Shu-Ha-Ri describes mastery stages: follow the rules (Shu), adapt them (Ha), transcend them (Ri) — matching how coaching lightens over time."},
+{cat:"people",dom:P,app:"General",q:"Mentoring differs from coaching mainly in that mentoring:",o:["Focuses on broader, longer-term development and career growth","Targets one specific current skill","Is always more directive","Only happens in agile teams"],a:0,e:"Coaching builds a specific current-performance skill; mentoring is a broader, relationship-based, longer-term development partnership."},
+{cat:"people",dom:P,app:"Hybrid",q:"When choosing a communication technology for a global team, the MOST important factor is usually:",o:["Whether it fits the message, urgency, and stakeholders' access","Picking the newest available tool","Using only email for a written record","Standardizing on one synchronous tool"],a:0,e:"Technology choice weighs urgency, sensitivity, availability, ease of use, and the environment — not novelty."},
+{cat:"people",dom:P,app:"General",q:"Co-locating a team in a shared workspace (a 'tight matrix' or war room) primarily improves:",o:["Communication and collaboration speed","Contractual risk transfer","Earned value accuracy","Procurement options"],a:0,e:"Co-location (tight matrix) boosts spontaneous communication and team cohesion; agile teams favor it or a virtual equivalent."},
+{cat:"people",dom:P,app:"Agile",q:"A self-organizing team is one that:",o:["Decides internally how to accomplish its work","Is told exactly how to do every task","Has no accountability","Requires a manager to assign all work"],a:0,e:"Self-organizing teams choose how to turn backlog items into increments; leaders provide goals and remove impediments, not task assignments."},
+{cat:"people",dom:P,app:"General",q:"Team-building activities are MOST valuable when:",o:["Conducted throughout the project, especially after changes","Done only at the kickoff","Reserved for when conflict erupts","Skipped for experienced teams"],a:0,e:"Team development is ongoing; it is especially useful when the team re-forms after membership or goal changes."},
+{cat:"people",dom:P,app:"General",q:"A team member asks you to resolve a conflict for them. The BEST servant-leader response is usually to:",o:["Help them work through it themselves","Decide the outcome and move on","Separate them permanently","Ignore it as not your concern"],a:0,e:"Servant leaders facilitate the team to resolve their own issues rather than imposing solutions, building lasting capability."},
+{cat:"people",dom:P,app:"General",q:"Directions of stakeholder influence include upward, downward, outward, and:",o:["Sideward (peers and other PMs)","Backward","Inward only","Vertical only"],a:0,e:"Sideward influence targets peers — fellow project managers and colleagues whose cooperation you need without authority over them."},
+{cat:"people",dom:P,app:"General",q:"A new PM inherits a team mid-project and morale is low. The BEST first action is to:",o:["Listen to the team to understand issues before acting","Replace underperformers quickly","Impose new processes immediately","Report the team to the sponsor"],a:0,e:"Understanding comes before action: gather the team's perspective, then address root causes collaboratively."},
+{cat:"people",dom:P,app:"General",q:"Groupthink in a decision-making team is BEST countered by:",o:["Encouraging dissent and inviting diverse viewpoints","Rewarding fast consensus","Letting the most senior voice decide","Limiting discussion time"],a:0,e:"Groupthink suppresses dissent; actively seeking opposing views and alternatives protects decision quality."},
+{cat:"people",dom:P,app:"General",q:"A manager assumes employees dislike work and must be closely controlled. This is:",o:["McGregor's Theory X","McGregor's Theory Y","Theory Z","Expectancy theory"],a:0,e:"Theory X managers assume people avoid work and need control and coercion; Theory Y assumes people are self-motivated."},
+{cat:"people",dom:P,app:"Agile",q:"During a retrospective the team keeps blaming individuals. The facilitator should:",o:["Refocus on the process and system, keeping it blameless","Let the blame continue for honesty","End the retrospective early","Report individuals to management"],a:0,e:"Retrospectives are blameless and focus on improving the process and system, creating the safety needed for honest improvement."},
+{cat:"people",dom:P,app:"General",q:"Which is the BEST way to build influence before you need it in a matrix organization?",o:["Build trusted relationships and demonstrate competence early","Wait until you need a favor to reach out","Rely on your title","Escalate whenever blocked"],a:0,e:"Influence without authority depends on relationships and credibility established in advance, not on positional power or escalation."},
+{cat:"people",dom:P,app:"General",q:"An introverted team member does their best work in focused, independent conditions. The BEST response is to:",o:["Adapt the work environment to leverage their strengths","Require them to work exactly like extroverts","Move them off the team","Assign them only group tasks"],a:0,e:"No personality type is better; the skill is matching tasks and environment to each person's preferences and strengths."},
+
+/* ===== PROCESS (added) ===== */
+{cat:"process",dom:PR,app:"Predictive",q:"Who formally authorizes the project and signs the project charter?",o:["The sponsor","The project manager","The project team","The customer's end users"],a:0,e:"The sponsor signs the charter, which authorizes the project and empowers the PM. The PM does not sign their own authorization."},
+{cat:"process",dom:PR,app:"Predictive",q:"Configuration management differs from change control in that configuration management focuses on:",o:["Controlling product specifications and versions (the what)","Approving or rejecting change requests (the whether)","Scheduling the work","Assigning resources"],a:0,e:"Configuration management governs the product's features/versions and consistency; change control governs whether changes to baselines are approved."},
+{cat:"process",dom:PR,app:"Predictive",q:"A change control board (CCB) is responsible for:",o:["Reviewing, approving, or rejecting change requests","Writing the code for approved changes","Setting team salaries","Signing the project charter"],a:0,e:"The CCB is the formal body that dispositions change requests. Its authority and membership are defined in the change management plan."},
+{cat:"process",dom:PR,app:"Predictive",q:"Raw observations such as 'task A is 60% complete' are:",o:["Work performance data","Work performance information","Work performance reports","Change requests"],a:0,e:"Data are raw measurements. Analyzed into context they become information; packaged for stakeholders they become reports."},
+{cat:"process",dom:PR,app:"Predictive",q:"A status dashboard combining analyzed metrics for stakeholders is:",o:["A work performance report","Work performance data","A change log","A requirements document"],a:0,e:"Work performance reports are the physical or electronic representations of work performance information compiled for decisions or awareness."},
+{cat:"process",dom:PR,app:"Predictive",q:"A requirements traceability matrix is used to:",o:["Link each requirement to its origin and deliverables through the project","Sequence activities","Assign risk owners","Calculate earned value"],a:0,e:"The RTM traces requirements from source to deliverable, ensuring each is delivered and tested and helping manage scope changes."},
+{cat:"process",dom:PR,app:"Predictive",q:"Adding features beyond requirements because the team thinks they add value is:",o:["Gold plating","Scope creep","Progressive elaboration","Fast tracking"],a:0,e:"Gold plating is the team adding unrequested extras. Scope creep is uncontrolled change driven from outside; both are undesirable."},
+{cat:"process",dom:PR,app:"Agile",q:"In MoSCoW prioritization, 'M' stands for:",o:["Must have","May have","Medium","Mandatory stretch"],a:0,e:"MoSCoW = Must have, Should have, Could have, Won't have (this time) — a common agile prioritization technique."},
+{cat:"process",dom:PR,app:"Predictive",q:"Free float is:",o:["The time an activity can slip without delaying the early start of any successor","The time an activity can slip without delaying the project","Always equal to total float","Only found on the critical path"],a:0,e:"Free float delays no successor's early start; total float delays no project finish. On the critical path both are typically zero."},
+{cat:"process",dom:PR,app:"Predictive",q:"The forward pass through a network diagram calculates:",o:["Early start and early finish dates","Late start and late finish dates","Total float","The critical chain buffer"],a:0,e:"The forward pass derives early start/finish (left to right); the backward pass derives late start/finish (right to left)."},
+{cat:"process",dom:PR,app:"Predictive",q:"Resource leveling typically:",o:["May change the critical path and extend the schedule","Never changes the project end date","Only reduces cost","Is the same as fast tracking"],a:0,e:"Leveling adjusts start/finish to resource constraints and can lengthen the schedule and shift the critical path. Smoothing does not change the critical path."},
+{cat:"process",dom:PR,app:"Predictive",q:"Resource smoothing differs from leveling in that smoothing:",o:["Keeps activities within their float and does not change the end date","Always extends the schedule","Ignores resource limits","Changes the critical path"],a:0,e:"Smoothing adjusts work within available float so the completion date is unchanged; leveling can move the end date."},
+{cat:"process",dom:PR,app:"Predictive",q:"Critical chain method adds buffers to protect the schedule. The buffer at the end of the critical chain is the:",o:["Project buffer","Feeding buffer","Resource buffer","Management reserve"],a:0,e:"The project buffer protects the end date; feeding buffers protect the critical chain where non-critical paths merge in."},
+{cat:"process",dom:PR,app:"Predictive",q:"A feeding buffer in critical chain is placed:",o:["Where a non-critical path feeds into the critical chain","At the very end of the project","On every activity","Only on the critical path"],a:0,e:"Feeding buffers absorb delays on feeding (non-critical) paths so they do not disturb the critical chain."},
+{cat:"process",dom:PR,app:"Predictive",q:"Running thousands of simulated schedule or cost outcomes to produce a probability distribution is:",o:["Monte Carlo analysis","Earned value analysis","Pareto analysis","Delphi technique"],a:0,e:"Monte Carlo simulation models uncertainty across many iterations, yielding confidence levels (e.g., an 80% chance of finishing by a date)."},
+{cat:"process",dom:PR,app:"Predictive",q:"A three-point estimate is used primarily to:",o:["Account for uncertainty using optimistic, most likely, and pessimistic values","Fix a single deterministic duration","Eliminate the need for reserves","Replace the WBS"],a:0,e:"Three-point estimating (triangular or beta/PERT) reflects uncertainty and risk in a single estimate."},
+{cat:"process",dom:PR,app:"Predictive",q:"A near-critical path matters because:",o:["A small slip there can make it the new critical path","It has the most float","It is always ignored","It cannot affect the end date"],a:0,e:"Paths with little float are near-critical; monitor them because minor delays can turn them critical."},
+{cat:"process",dom:PR,app:"Predictive",q:"The cost baseline is:",o:["The time-phased, approved budget excluding management reserves","The total budget including management reserves","The same as the funding limit","Only the contingency reserve"],a:0,e:"Cost baseline = sum of work package estimates plus contingency reserves, spread over time. Adding management reserves gives the total budget."},
+{cat:"process",dom:PR,app:"Predictive",q:"Money already spent that should not influence future decisions is a:",o:["Sunk cost","Opportunity cost","Variable cost","Direct cost"],a:0,e:"Sunk costs are unrecoverable and irrelevant to go-forward decisions; basing decisions on them is a common trap."},
+{cat:"process",dom:PR,app:"Predictive",q:"A project office's rent allocated across many projects is an example of a(n):",o:["Indirect cost","Direct cost","Variable cost","Sunk cost"],a:0,e:"Indirect costs are shared across multiple projects (overhead). Direct costs are attributable to one specific project."},
+{cat:"process",dom:PR,app:"Predictive",q:"Material costs that rise with the number of units produced are:",o:["Variable costs","Fixed costs","Indirect costs","Sunk costs"],a:0,e:"Variable costs change with the volume of work/output; fixed costs stay constant regardless of volume."},
+{cat:"process",dom:PR,app:"Predictive",q:"Quality is defined as conformance to requirements; grade refers to:",o:["A category for items with the same function but different technical features","The same thing as quality","The cost of the item","The defect rate"],a:0,e:"Low grade may be acceptable; low quality (failing requirements) is never acceptable. They are distinct concepts."},
+{cat:"process",dom:PR,app:"Predictive",q:"Quality assurance (managing quality) is primarily about:",o:["Improving the processes that produce deliverables","Inspecting finished deliverables for defects","Getting customer acceptance","Approving changes"],a:0,e:"QA/Manage Quality is process-focused and proactive (prevention); QC/Control Quality is product-focused inspection."},
+{cat:"process",dom:PR,app:"Predictive",q:"The cost of quality category that includes training and process documentation is:",o:["Prevention costs","Appraisal costs","Internal failure costs","External failure costs"],a:0,e:"Prevention (training, documenting processes) and appraisal (testing, inspection) are costs of conformance; failure costs are nonconformance."},
+{cat:"process",dom:PR,app:"Predictive",q:"PMI's quality philosophy favors:",o:["Prevention over inspection","Inspection over prevention","Finding defects at the customer","Accepting a normal defect rate"],a:0,e:"It is cheaper to design quality in (prevention) than to inspect it in or fix defects later. This is a recurring exam theme."},
+{cat:"process",dom:PR,app:"Predictive",q:"A scatter diagram is used to:",o:["Show the relationship between two variables","Rank defects by frequency","Display a process over time","Show data distribution shape"],a:0,e:"Scatter diagrams reveal correlation between two variables; Pareto ranks causes; control charts show time; histograms show distribution."},
+{cat:"process",dom:PR,app:"Predictive",q:"A histogram is BEST used to:",o:["Show the frequency distribution of data","Show correlation between variables","Rank problems by impact","Track a process against control limits"],a:0,e:"Histograms display how data is distributed across ranges, revealing shape, center, and spread."},
+{cat:"process",dom:PR,app:"Predictive",q:"Control limits on a control chart are set by:",o:["The process itself (usually +/- 3 sigma from the mean)","The customer's requirements","The specification limits","The project manager's preference"],a:0,e:"Control limits reflect the process's natural variation; specification limits come from customer requirements. They are not the same."},
+{cat:"process",dom:PR,app:"Predictive",q:"Comparing your practices against other organizations to find improvement ideas is:",o:["Benchmarking","Design of experiments","Statistical sampling","Root-cause analysis"],a:0,e:"Benchmarking compares practices/performance against comparable organizations to identify best practices and improvement targets."},
+{cat:"process",dom:PR,app:"Predictive",q:"Design of experiments (DOE) is used to:",o:["Identify which factors most influence an outcome","Accept or reject deliverables","Rank risks","Build the WBS"],a:0,e:"DOE systematically varies factors to find the optimal configuration and the variables with the greatest effect on quality."},
+{cat:"process",dom:PR,app:"Predictive",q:"The risk register and the risk report differ in that the risk report describes:",o:["Overall project risk and summary information on individual risks","Only one risk in detail","The change log","The stakeholder list"],a:0,e:"The risk register holds individual risk details; the risk report summarizes sources of overall project risk and the big picture."},
+{cat:"process",dom:PR,app:"Predictive",q:"A probability and impact matrix is used during:",o:["Qualitative risk analysis","Quantitative risk analysis","Risk response planning","Risk identification"],a:0,e:"The P-I matrix prioritizes risks qualitatively by combining probability and impact ratings to focus attention."},
+{cat:"process",dom:PR,app:"Predictive",q:"A risk breakdown structure (RBS) organizes risks by:",o:["Category and source","Probability","Owner","Cost"],a:0,e:"The RBS is a hierarchical categorization of risk sources (technical, external, organizational, project management) to aid identification."},
+{cat:"process",dom:PR,app:"Predictive",q:"An unplanned response to a risk that was accepted or not identified, created on the spot, is a:",o:["Workaround","Contingency plan","Fallback plan","Mitigation"],a:0,e:"A workaround is an unplanned response to an issue that has already occurred (often a realized unidentified or accepted risk)."},
+{cat:"process",dom:PR,app:"Predictive",q:"The amount of variation around an objective that stakeholders will accept is risk:",o:["Tolerance","Appetite","Threshold","Register"],a:0,e:"Appetite is willingness to take on uncertainty for reward; tolerance is the acceptable variation; threshold is the specific trigger level."},
+{cat:"process",dom:PR,app:"Predictive",q:"A tornado diagram is the typical output of:",o:["Sensitivity analysis","Monte Carlo cost analysis","Pareto analysis","SWOT analysis"],a:0,e:"Sensitivity analysis shows which risks have the most potential impact, displayed as a tornado diagram ranking variables by influence."},
+{cat:"process",dom:PR,app:"Predictive",q:"To increase the probability or positive impact of an opportunity without making it certain, you would:",o:["Enhance it","Exploit it","Share it","Accept it"],a:0,e:"Enhance increases probability/impact; exploit makes it certain; share brings in a partner better able to capture the opportunity."},
+{cat:"process",dom:PR,app:"Predictive",q:"Partnering with a specialist firm to capture an opportunity neither party could alone is which strategy?",o:["Share","Exploit","Enhance","Transfer"],a:0,e:"Sharing (opportunity) allocates ownership to a third party best able to capture the benefit — the positive mirror of transfer."},
+{cat:"process",dom:PR,app:"Predictive",q:"PESTLE is used in risk work as a:",o:["Prompt list of external risk categories","Response strategy","Quantitative model","Procurement document"],a:0,e:"Prompt lists like PESTLE (political, economic, social, technological, legal, environmental) stimulate identification of external risks."},
+{cat:"process",dom:PR,app:"Predictive",q:"A statement of work (SOW) in procurement describes:",o:["The portion of work to be delivered under the contract","The seller's financials","The buyer's org chart","The project risk register"],a:0,e:"The procurement SOW defines the goods/services to be provided in enough detail for sellers to determine if they can deliver."},
+{cat:"process",dom:PR,app:"Predictive",q:"A buyer wants sellers to propose solutions to a defined problem, not just a price. The BEST bid document is a:",o:["Request for proposal (RFP)","Request for quotation (RFQ)","Invitation for bid (IFB)","Purchase order"],a:0,e:"An RFP invites proposed approaches/solutions. An RFQ or IFB seeks pricing for well-defined goods/services."},
+{cat:"process",dom:PR,app:"Predictive",q:"A make-or-buy analysis determines:",o:["Whether to produce work internally or procure it","The contract type","The seller's margin","The warranty terms"],a:0,e:"Make-or-buy weighs cost, capability, capacity, and risk to decide whether to perform work in-house or outsource it."},
+{cat:"process",dom:PR,app:"Predictive",q:"Which document is signed first when a buyer wants work to begin before the full contract is finalized?",o:["A letter of intent","The final contract","A warranty","A change order"],a:0,e:"A letter of intent signals intent to contract and can authorize preliminary work, but it is generally not a binding contract itself."},
+{cat:"process",dom:PR,app:"Predictive",q:"At procurement/contract closure, a key activity is to:",o:["Verify all work and terms are met and formally close the agreement","Start a new procurement","Skip documentation if the vendor performed well","Pay regardless of acceptance"],a:0,e:"Close Procurements confirms deliverables and terms are satisfied, settles claims, and archives records for lessons learned."},
+{cat:"process",dom:PR,app:"Predictive",q:"The project management plan is baselined for:",o:["Scope, schedule, and cost","Only cost","Only scope","Risk and quality"],a:0,e:"The three performance baselines are scope, schedule, and cost; together they form the performance measurement baseline."},
+{cat:"process",dom:PR,app:"Predictive",q:"Decomposing the WBS past the point where you can reliably estimate and manage work leads to:",o:["Excessive overhead and diminishing value","Better control always","A smaller project","More accurate risk analysis"],a:0,e:"Stop decomposing at the work-package level; over-decomposition creates non-productive management effort."},
+{cat:"process",dom:PR,app:"Predictive",q:"A milestone has what duration on the schedule?",o:["Zero","One day","Equal to the activity before it","Variable"],a:0,e:"Milestones mark significant points or events and have zero duration; they represent achievements, not work."},
+{cat:"process",dom:PR,app:"Predictive",q:"The MOST accurate but most time-consuming estimating technique is:",o:["Bottom-up estimating","Analogous estimating","Parametric estimating","Expert judgment alone"],a:0,e:"Bottom-up sums detailed work-package estimates for high accuracy at high effort; analogous is fastest but least accurate."},
+{cat:"process",dom:PR,app:"Predictive",q:"Work performance information is produced by:",o:["Comparing work performance data against the plan","Collecting raw measurements","Writing the charter","Approving changes"],a:0,e:"Information results from analyzing data in context (e.g., status against baseline), which then feeds work performance reports."},
+{cat:"process",dom:PR,app:"Predictive",q:"The primary purpose of a kickoff meeting is to:",o:["Align stakeholders on objectives, roles, and the plan","Produce the final deliverable","Close the project","Sign the contract"],a:0,e:"Kickoff aligns the team and stakeholders on goals, roles, and approach; timing varies for small vs large or phased projects."},
+{cat:"process",dom:PR,app:"Predictive",q:"A change request is approved. What must the PM update NEXT?",o:["The affected baselines and plan components","Only the team's task list","Nothing until closing","The business case only"],a:0,e:"Approved changes flow into updates of the relevant baselines, plans, and documents so the plan stays current."},
+{cat:"process",dom:PR,app:"Hybrid",q:"A deliverable has a minor defect but the customer is willing to accept it as-is. The PM should:",o:["Document the accepted deviation via change control / concession","Hide it and ship","Fix it without telling anyone","Cancel the deliverable"],a:0,e:"Accepting a known deviation is documented (concession/waiver) so the record is accurate and traceable."},
+
+/* ===== BUSINESS ENVIRONMENT (added) ===== */
+{cat:"business",dom:B,app:"General",q:"A steering committee's primary role is to:",o:["Provide governance, strategic direction, and major decisions","Manage the daily backlog","Write the test cases","Run the daily standup"],a:0,e:"Steering committees give oversight, resolve escalations, and make go/no-go and funding decisions aligned to strategy."},
+{cat:"business",dom:B,app:"General",q:"Governance and management differ in that governance:",o:["Sets direction and oversight; management executes within it","Does the hands-on work","Is only for agile teams","Replaces the sponsor"],a:0,e:"Governance defines authority, policy, and oversight; management operates the project within that framework."},
+{cat:"business",dom:B,app:"General",q:"A variance exceeds the agreed threshold defined by governance. The PM should:",o:["Escalate per the governance/escalation rules","Absorb it silently","Wait until closing to report","Change the baseline unilaterally"],a:0,e:"Governance sets tolerance thresholds; breaching one triggers a defined escalation, not silent absorption or unilateral re-baselining."},
+{cat:"business",dom:B,app:"General",q:"A voluntary industry best practice that an organization chooses to follow is a:",o:["Standard","Regulation","Law","Mandate"],a:0,e:"Standards are optional guidelines; regulations and laws are mandatory. Confusing the two is a common exam distinction."},
+{cat:"business",dom:B,app:"General",q:"A new data-privacy law applies to your project's customer data. This requirement is:",o:["Mandatory compliance that must be built in","Optional if it slows delivery","Only legal's concern, not the PM's","Deferrable to a later phase"],a:0,e:"Legal and regulatory requirements are mandatory and must be planned into scope, quality, and risk from the start."},
+{cat:"business",dom:B,app:"General",q:"The benefits management plan is primarily owned and sustained by:",o:["The sponsor / business owner","The project manager indefinitely","The vendor","The scheduler"],a:0,e:"The PM delivers capabilities; the sponsor or business owns realizing and sustaining benefits, often after the project closes."},
+{cat:"business",dom:B,app:"General",q:"A deliverable (output) differs from a benefit in that a benefit is:",o:["The value or outcome the deliverable enables","The physical product itself","Always financial","Measured only at closing"],a:0,e:"Outputs are what the project produces; benefits are the measurable improvements or value those outputs create for the organization."},
+{cat:"business",dom:B,app:"General",q:"A leading indicator of benefits realization is one that:",o:["Predicts future benefit achievement early","Can only be measured after benefits occur","Is always financial","Is irrelevant to governance"],a:0,e:"Leading indicators give early signals (e.g., adoption rate); lagging indicators confirm results after the fact (e.g., cost savings realized)."},
+{cat:"business",dom:B,app:"General",q:"Midway through, new information shows the project's business case is no longer valid. The BEST action is to:",o:["Recommend to governance that the project be stopped or re-scoped","Continue to avoid wasting prior spend","Finish quietly and report success","Hide the finding"],a:0,e:"When the business case fails, continuing destroys value (the sunk-cost trap). Raise it to governance for a stop or pivot decision."},
+{cat:"business",dom:B,app:"General",q:"A feasibility study is conducted primarily to:",o:["Determine whether a proposed project is viable before committing","Build the detailed schedule","Assign the team","Close the project"],a:0,e:"Feasibility assesses technical, economic, legal, operational, and scheduling viability to inform the go decision."},
+{cat:"business",dom:B,app:"General",q:"The ADKAR model of change management stands for Awareness, Desire, Knowledge, Ability, and:",o:["Reinforcement","Return","Readiness","Resistance"],a:0,e:"ADKAR: Awareness, Desire, Knowledge, Ability, Reinforcement — a widely used framework for individual change adoption."},
+{cat:"business",dom:B,app:"General",q:"Kotter's change model begins with:",o:["Creating a sense of urgency","Declaring victory","Removing obstacles","Anchoring changes in culture"],a:0,e:"Kotter's 8 steps start by establishing urgency and end by anchoring new approaches in the culture."},
+{cat:"business",dom:B,app:"General",q:"The MOST important factor in successful organizational change is often:",o:["Active and visible sponsorship","A detailed Gantt chart","A large training budget","A new software tool"],a:0,e:"Change-management research consistently ranks active, visible executive sponsorship as the top contributor to change success."},
+{cat:"business",dom:B,app:"General",q:"Users strongly resist a new system. The BEST change-management response is to:",o:["Understand the sources of resistance and address them","Enforce adoption through penalties","Ignore resistance and proceed","Delay indefinitely"],a:0,e:"Effective change management diagnoses and addresses the root causes of resistance rather than overriding or ignoring it."},
+{cat:"business",dom:B,app:"General",q:"An organization is launching many changes at once and adoption is faltering. This is a sign of:",o:["Change saturation","Too little change","Strong reinforcement","Low urgency"],a:0,e:"Change saturation occurs when the volume of concurrent change exceeds people's capacity to absorb it, hurting adoption."},
+{cat:"business",dom:B,app:"General",q:"The triple bottom line evaluates performance across:",o:["People, planet, and profit","Scope, time, and cost","Quality, risk, and procurement","Plan, do, check"],a:0,e:"The triple bottom line (social, environmental, economic) underpins sustainability and ESG thinking in project decisions."},
+{cat:"business",dom:B,app:"General",q:"Designing a project to reuse and recycle materials rather than dispose of them reflects:",o:["A circular-economy / sustainability principle","A procurement risk transfer","Scope creep","A compliance violation"],a:0,e:"Circular-economy thinking minimizes waste and extends resource life, a growing sustainability consideration in project design."},
+{cat:"business",dom:B,app:"General",q:"When using AI to forecast project outcomes, the PM should FIRST ensure:",o:["The underlying data is accurate and unbiased","The output is accepted without review","The tool replaces the risk process","Stakeholders are not informed"],a:0,e:"AI outputs are only as good as their data; the PM verifies data quality and remains accountable for decisions (human in the loop)."},
+{cat:"business",dom:B,app:"General",q:"A concern that an AI tool may produce biased recommendations is BEST handled by:",o:["Adding human review and governance over AI outputs","Trusting the model fully","Removing all AI use","Hiding the tool from stakeholders"],a:0,e:"AI governance and human-in-the-loop review guard against bias and errors; the PM stays accountable for the decision."},
+{cat:"business",dom:B,app:"General",q:"In a functional organization, the project manager's authority is typically:",o:["Low — functional managers control resources","High — the PM controls the budget","Total — projectized","Shared equally in a balanced split"],a:0,e:"In functional structures, functional managers hold the power and resources; the PM has little authority (often a coordinator/expeditor)."},
+{cat:"business",dom:B,app:"General",q:"In a projectized organization, the project manager's authority is:",o:["High — the PM controls resources and budget","Low — functional managers dominate","None — only part-time","Equal to a coordinator"],a:0,e:"Projectized structures organize around projects; the PM has high-to-total authority and dedicated resources."},
+{cat:"business",dom:B,app:"General",q:"In a strong matrix organization, the balance of power favors:",o:["The project manager","The functional manager","The customer","The PMO director"],a:0,e:"Strong matrix tilts authority toward the PM; weak matrix toward functional managers; balanced matrix shares it."},
+{cat:"business",dom:B,app:"General",q:"A PMO that provides templates, training, and support but does not mandate their use is:",o:["A supportive PMO","A controlling PMO","A directive PMO","A program office"],a:0,e:"Supportive PMOs offer resources with low control; controlling PMOs require compliance; directive PMOs run the projects directly."},
+{cat:"business",dom:B,app:"General",q:"A directive PMO is characterized by:",o:["Taking direct control by managing the projects itself","Only offering optional templates","Having no authority","Auditing after the fact only"],a:0,e:"Directive PMOs assign PMs and manage projects directly — the highest degree of control among PMO types."},
+{cat:"business",dom:B,app:"General",q:"Company culture, existing systems, and market conditions are examples of:",o:["Enterprise environmental factors (EEFs)","Organizational process assets (OPAs)","Deliverables","Change requests"],a:0,e:"EEFs are conditions not under the team's control that influence the project; OPAs are the organization's own plans, processes, and knowledge."},
+{cat:"business",dom:B,app:"General",q:"Templates, historical lessons learned, and standard procedures are examples of:",o:["Organizational process assets (OPAs)","Enterprise environmental factors (EEFs)","Work performance data","Risk responses"],a:0,e:"OPAs are the organization's internal assets — processes, policies, and knowledge bases — that the team can use and update."},
+{cat:"business",dom:B,app:"General",q:"A vendor offers you an expensive personal gift during source selection. Per PMI ethics you should:",o:["Decline and disclose it to avoid a conflict of interest","Accept it quietly","Accept it and pick a different vendor","Report the vendor to authorities first"],a:0,e:"PMI's Code of Ethics (responsibility, respect, fairness, honesty) requires avoiding and disclosing conflicts of interest, including gifts."},
+{cat:"business",dom:B,app:"General",q:"You discover a colleague is falsifying status reports. The ethical action is to:",o:["Report it through appropriate channels","Ignore it to avoid conflict","Confront them publicly to shame them","Falsify your own to match"],a:0,e:"Honesty and responsibility require reporting unethical conduct through proper channels; silence or retaliation is not acceptable."},
+{cat:"business",dom:B,app:"General",q:"Using another company's copyrighted material in your deliverable without permission violates which value?",o:["Respect (for intellectual property and others' rights)","Only local policy","Nothing, if unpaid","Fairness only"],a:0,e:"Respecting intellectual property rights is part of PMI's ethical standard; unauthorized use is a violation regardless of cost."},
+{cat:"business",dom:B,app:"General",q:"A program differs from a project in that a program:",o:["Coordinates related projects to achieve benefits unattainable separately","Is always shorter","Has no benefits focus","Is a single deliverable"],a:0,e:"Programs manage related projects together to realize benefits and control not available by managing them individually."},
+{cat:"business",dom:B,app:"General",q:"Portfolio management is primarily concerned with:",o:["Selecting and prioritizing the right work to meet strategic goals","Running the daily standup","Writing user stories","Closing one project"],a:0,e:"Portfolios align the mix of programs and projects with strategy — doing the right work, not just doing work right."},
+{cat:"business",dom:B,app:"General",q:"Ongoing, repetitive work that keeps the business running is:",o:["Operations, not a project","A project","A program","A portfolio"],a:0,e:"Projects are temporary and produce unique results; operations are ongoing and repetitive. Projects often hand deliverables to operations."},
+{cat:"business",dom:B,app:"General",q:"The 2026 PMI Talent Triangle's three skill areas are ways of working, business acumen, and:",o:["Power skills","Agile only","Procurement","Scheduling"],a:0,e:"The Talent Triangle covers ways of working, power (interpersonal) skills, and business acumen — reflected in PDU requirements."},
+{cat:"business",dom:B,app:"General",q:"A sudden economic downturn threatens funding for your project. The PM should FIRST:",o:["Engage the sponsor/governance to reassess priorities and the business case","Keep spending to plan","Cancel unilaterally","Hide the exposure"],a:0,e:"External shifts are escalated to governance to reassess viability and priorities; the PM does not decide alone to cancel or ignore it."},
+{cat:"business",dom:B,app:"General",q:"Organizational culture influences a project MOST directly by shaping:",o:["How decisions are made and how people collaborate","The laws of physics","The contract type only","The exam weightings"],a:0,e:"Culture (an EEF) affects decision-making, risk appetite, communication, and collaboration norms the PM must navigate."},
+{cat:"business",dom:B,app:"General",q:"After go-live, benefit sustainment ensures that:",o:["Benefits continue to be realized over time, not just at handover","The project reopens","The team stays assigned forever","No measurement is needed"],a:0,e:"Sustainment embeds the change and keeps monitoring so benefits endure; it is typically an operations/business responsibility."},
+{cat:"business",dom:B,app:"General",q:"A compliance audit finds a gap in your project's regulatory controls. The BEST response is to:",o:["Assess the gap, remediate, and document corrective action","Dispute the audit and continue","Wait for enforcement","Quietly adjust records"],a:0,e:"Compliance gaps are assessed and remediated through proper channels with documentation; concealment compounds the violation."},
+{cat:"business",dom:B,app:"General",q:"A stakeholder readiness assessment in change management measures:",o:["How prepared impacted groups are to adopt the change","The project budget","The critical path","The defect rate"],a:0,e:"Readiness assessments gauge awareness, capability, and willingness so adoption activities can be targeted where resistance is highest."},
+{cat:"business",dom:B,app:"General",q:"Reinforcement in change management primarily serves to:",o:["Prevent people from reverting to old ways","Launch the change","Identify stakeholders","Write the business case"],a:0,e:"Reinforcement (recognition, feedback, correcting backsliding) sustains adoption so the change sticks after go-live."},
+{cat:"business",dom:B,app:"General",q:"Incorporating accessibility and fair access for all users into a product reflects:",o:["Social responsibility / inclusive design","A scope reduction","A compliance exemption","Gold plating by default"],a:0,e:"Designing for inclusion and equitable access is part of social responsibility and increasingly an ESG and sometimes compliance consideration."},
+
+/* ===== AGILE & HYBRID (added) ===== */
+{cat:"agile",dom:PR,app:"Agile",q:"A good user story follows the INVEST criteria, meaning each story should be Independent, Negotiable, Valuable, Estimable, Small, and:",o:["Testable","Technical","Tracked","Timed"],a:0,e:"INVEST = Independent, Negotiable, Valuable, Estimable, Small, Testable — a checklist for well-formed backlog items."},
+{cat:"agile",dom:PR,app:"Agile",q:"The common user-story format is:",o:["As a <role>, I want <goal>, so that <benefit>","Given, when, then","Must, should, could, won't","Do, check, act"],a:0,e:"The role-goal-benefit template keeps stories focused on user value. 'Given/when/then' is for acceptance criteria."},
+{cat:"agile",dom:PR,app:"Agile",q:"A minimum viable product (MVP) is:",o:["The smallest release that delivers value and enables learning","The full final product","A prototype that is thrown away","The last increment before launch"],a:0,e:"An MVP delivers enough value to real users to validate assumptions and learn, guiding further investment."},
+{cat:"agile",dom:PR,app:"Agile",q:"A time-boxed research task to reduce uncertainty before committing to a story is a:",o:["Spike","Epic","Theme","Sprint goal"],a:0,e:"A spike is a short, time-boxed investigation (technical or functional) to gain the knowledge needed to estimate or proceed."},
+{cat:"agile",dom:PR,app:"Agile",q:"A Definition of Ready (DoR) ensures that a backlog item is:",o:["Clear and detailed enough to be pulled into a sprint","Already completed","Deployed to production","Removed from the backlog"],a:0,e:"DoR sets the entry criteria (clear, estimated, testable) for work to be sprint-ready; DoD sets the exit criteria for 'done'."},
+{cat:"agile",dom:PR,app:"Agile",q:"A large body of work that is too big for one sprint and is broken into stories is an:",o:["Epic","Spike","Increment","Impediment"],a:0,e:"Epics are large items decomposed into smaller stories; related epics/stories may roll up into themes or features."},
+{cat:"agile",dom:PR,app:"Agile",q:"An information radiator (e.g., a big visible task board) is valued because it:",o:["Makes progress and problems transparent to everyone","Hides status from outsiders","Replaces all meetings","Is required by contract"],a:0,e:"Information radiators provide highly visible, always-current status, supporting transparency and self-organization."},
+{cat:"agile",dom:PR,app:"Agile",q:"In a cumulative flow diagram, a widening band for one stage indicates:",o:["A bottleneck where work is piling up","Perfect flow","Scope reduction","Completed work"],a:0,e:"A growing band signals a bottleneck — arrivals exceed completions at that stage; the team should swarm to clear it."},
+{cat:"agile",dom:P,app:"Agile",q:"A stakeholder frequently interrupts the team mid-sprint with requests. The Scrum Master should:",o:["Shield the team and route requests to the Product Owner","Let the interruptions continue","Tell the team to just comply","Escalate to fire the stakeholder"],a:0,e:"Protecting the team from disruption and channeling new work through the PO/backlog is core servant-leadership behavior."},
+{cat:"agile",dom:PR,app:"Agile",q:"SAFe, LeSS, and Scrum of Scrums are examples of:",o:["Agile scaling frameworks/approaches","Estimation techniques","Contract types","Quality tools"],a:0,e:"These coordinate multiple teams on large efforts. LeSS keeps one PO and one backlog; SAFe adds program/portfolio layers; Scrum of Scrums is the simplest."},
+{cat:"agile",dom:PR,app:"Agile",q:"Lean's central aim is to:",o:["Eliminate waste and maximize value flow","Maximize documentation","Fix scope early","Add buffers everywhere"],a:0,e:"Lean focuses on eliminating waste, amplifying learning, delivering fast, and optimizing the whole."},
+{cat:"agile",dom:PR,app:"Agile",q:"An agile team wants to improve predictability of delivery dates. The MOST useful metric is:",o:["Throughput / velocity trends over time","A single sprint's velocity","Lines of code","Hours logged"],a:0,e:"Trends in throughput or velocity across iterations forecast delivery better than any single data point or activity measure."},
+{cat:"agile",dom:PR,app:"Hybrid",q:"A predictive construction project adopts daily standups and a visual board for its design team. This is:",o:["A reasonable hybrid tailoring","Not allowed — methods cannot mix","Pure Scrum","A compliance risk"],a:0,e:"Borrowing practices that fit the context is tailoring; hybrid approaches blend predictive and agile elements deliberately."},
+{cat:"agile",dom:P,app:"Agile",q:"A Product Owner is frequently unavailable, slowing decisions. The BEST action is to:",o:["Work with the PO/organization to secure their availability or a proxy","Have developers guess priorities","Cancel the sprints","Escalate to replace the whole team"],a:0,e:"An engaged, available PO is essential; the Scrum Master addresses the impediment, arranging availability or an empowered proxy."},
+{cat:"agile",dom:PR,app:"Agile",q:"Refactoring in agile means:",o:["Improving internal code structure without changing external behavior","Adding new features","Rewriting requirements","Removing tests"],a:0,e:"Refactoring improves maintainability and reduces technical debt while preserving behavior — a core XP practice."},
+{cat:"agile",dom:PR,app:"Agile",q:"Technical debt refers to:",o:["The future cost of shortcuts taken now in the codebase or design","Unpaid vendor invoices","The project contingency reserve","Overtime owed to the team"],a:0,e:"Technical debt is the implied cost of rework from choosing a quick solution now; it should be tracked and paid down."},
+{cat:"agile",dom:PR,app:"Agile",q:"The product backlog is BEST described as:",o:["An ordered, emergent list of everything that might be needed","A fixed, fully detailed requirements document","The sprint's committed work only","The team's impediment list"],a:0,e:"The product backlog is a living, ordered list owned by the PO; it is refined and reprioritized continuously."},
+{cat:"agile",dom:PR,app:"Agile",q:"A sprint is cancelled only when:",o:["The Sprint Goal becomes obsolete","The team is behind","A stakeholder requests it","A bug is found"],a:0,e:"Only the Product Owner can cancel a sprint, and only if the Sprint Goal becomes obsolete — a rare event."},
+{cat:"agile",dom:PR,app:"Agile",q:"Relative estimation with planning poker helps a team:",o:["Reach shared estimates and surface differing assumptions","Set exact hour-by-hour plans","Eliminate the Product Owner","Replace the retrospective"],a:0,e:"Planning poker uses relative sizing and discussion to align understanding and expose hidden assumptions, improving estimates."},
+{cat:"agile",dom:P,app:"Agile",q:"The BEST way to handle a team member who dominates every discussion is to:",o:["Facilitate balanced participation so all voices are heard","Let them lead everything","Remove them immediately","Ignore the imbalance"],a:0,e:"Facilitation techniques (round-robin, timeboxing, direct invitations) ensure balanced input and protect team collaboration."},
+
+/* ===== FORMULAS (added) ===== */
+{cat:"formula",dom:PR,app:"Predictive",q:"An activity has ES=5, EF=9, LS=8, LF=12. What is its total float?",o:["3","0","4","7"],a:0,e:"Total float = LS − ES = 8 − 5 = 3 (equivalently LF − EF = 12 − 9 = 3)."},
+{cat:"formula",dom:PR,app:"Predictive",q:"PV = $60,000, EV = $50,000, AC = $55,000. Is the project over or under budget, and by how much?",o:["Over budget by $5,000 (CV = −5,000)","Under budget by $5,000","On budget","Over budget by $10,000"],a:0,e:"CV = EV − AC = 50,000 − 55,000 = −$5,000 — negative means over budget."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Using the same values (PV=60k, EV=50k, AC=55k), the schedule variance (SV) is:",o:["−$10,000 (behind schedule)","+$10,000","−$5,000","$0"],a:0,e:"SV = EV − PV = 50,000 − 60,000 = −$10,000 — negative means behind schedule."},
+{cat:"formula",dom:PR,app:"Predictive",q:"BAC = $200,000, and you have spent AC = $90,000 to earn EV = $80,000. What is the EAC assuming the current CPI continues?",o:["$225,000","$210,000","$190,000","$200,000"],a:0,e:"CPI = 80/90 = 0.889; EAC = BAC/CPI = 200,000/0.889 ≈ $225,000."},
+{cat:"formula",dom:PR,app:"Predictive",q:"A risk has a 40% chance of a $50,000 loss and a 60% chance of no loss. Its EMV is:",o:["−$20,000","−$50,000","−$30,000","+$20,000"],a:0,e:"EMV = 0.40 × (−50,000) + 0.60 × 0 = −$20,000."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Optimistic = 6, Most likely = 9, Pessimistic = 18. The triangular (simple average) estimate is:",o:["11","10.5","9","12"],a:0,e:"Triangular = (O + M + P)/3 = (6 + 9 + 18)/3 = 33/3 = 11. (Beta/PERT would weight M by 4.)"},
+{cat:"formula",dom:PR,app:"Predictive",q:"A team of 6 adds 2 members. How many total communication channels now exist?",o:["28","21","15","36"],a:0,e:"n = 8, channels = n(n−1)/2 = 8×7/2 = 28."},
+{cat:"formula",dom:PR,app:"Predictive",q:"BAC = $500,000, EV = $200,000, AC = $250,000. The TCPI to complete within the original budget is:",o:["1.2","0.8","1.0","1.25"],a:0,e:"TCPI = (BAC − EV)/(BAC − AC) = (500k − 200k)/(500k − 250k) = 300k/250k = 1.2."},
+{cat:"formula",dom:PR,app:"Agile",q:"A Kanban team completes 10 items per week with an average WIP of 30 items. Average cycle time is:",o:["3 weeks","300 weeks","0.33 weeks","40 weeks"],a:0,e:"Cycle time = WIP / throughput = 30 / 10 = 3 weeks (Little's Law)."},
+{cat:"formula",dom:B,app:"General",q:"Two projects: A has NPV $120k, B has NPV $150k but a longer payback. Based on NPV alone you choose:",o:["Project B","Project A","Neither","The shorter payback regardless of NPV"],a:0,e:"NPV already accounts for the time value of money; the higher NPV (B) is preferred when selecting on NPV."},
+{cat:"formula",dom:B,app:"General",q:"A project returns $300,000 in benefits for $200,000 in cost. The benefit-cost ratio (BCR) is:",o:["1.5","0.67","2.0","1.0"],a:0,e:"BCR = benefits / costs = 300,000 / 200,000 = 1.5. Above 1.0 means benefits exceed costs."},
+{cat:"formula",dom:B,app:"General",q:"When comparing projects by internal rate of return (IRR), you generally select the one with the:",o:["Higher IRR","Lower IRR","IRR closest to zero","Negative IRR"],a:0,e:"A higher IRR indicates a more attractive return; it is the discount rate at which NPV equals zero."},
+{cat:"formula",dom:PR,app:"Predictive",q:"An activity can be delayed 2 days without delaying the project but only 1 day without delaying its successor's early start. Its free float is:",o:["1 day","2 days","3 days","0 days"],a:0,e:"Free float concerns the successor's early start (1 day here); total float concerns the project finish (2 days)."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Reserve analysis sets contingency at the EMV of identified risks: three risks with EMVs of −$4k, −$6k, and −$5k. A reasonable contingency reserve is about:",o:["$15,000","$6,000","$5,000","$45,000"],a:0,e:"Summing the expected monetary values (4k + 6k + 5k) gives roughly $15,000 of contingency for the identified risks."},
+{cat:"formula",dom:PR,app:"Predictive",q:"EV = $120,000 and BAC = $400,000. What percent of the total project work is complete?",o:["30%","40%","12%","3%"],a:0,e:"Percent complete = EV / BAC = 120,000 / 400,000 = 30% of the total budgeted work."},
+{cat:"formula",dom:PR,app:"Predictive",q:"If CPI = 1.0 and SPI = 0.9, the project is:",o:["On budget but behind schedule","Over budget and behind","Under budget and ahead","On budget and ahead"],a:0,e:"CPI = 1.0 means exactly on budget; SPI = 0.9 (below 1.0) means behind schedule."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Analogous estimating is BEST described as:",o:["Using a similar past project to estimate, quickly but less precisely","Summing detailed work packages","Multiplying a unit rate by quantity","Running a simulation"],a:0,e:"Analogous (top-down) estimating uses historical data from similar work; it is fast and low-cost but less accurate than bottom-up or parametric."},
+{cat:"formula",dom:PR,app:"Predictive",q:"A definitive (control-grade) estimate typically carries an accuracy range of:",o:["−5% to +10%","−25% to +75%","−10% to +25%","±50%"],a:0,e:"Definitive estimates are the most precise (−5% to +10%); ROM is widest (−25% to +75%)."},
+{cat:"formula",dom:PR,app:"Predictive",q:"In a cost-plus (cost-reimbursable) contract, a cost overrun is borne mainly by the:",o:["Buyer","Seller","Vendor's insurer","Project manager personally"],a:0,e:"In cost-reimbursable contracts the buyer carries most cost risk, reimbursing the seller's allowable costs plus a fee. (In a firm-fixed-price contract the seller would carry it.)"},
+{cat:"formula",dom:PR,app:"Agile",q:"A team's velocity over three sprints is 20, 24, and 22 points. To forecast, you would MOST reasonably use:",o:["An average of about 22 points per sprint","The highest value, 24","The lowest value, 20","The sum, 66, per sprint"],a:0,e:"Averaging recent velocities (~22) gives a stable basis for forecasting how much the team can take on."},
+{cat:"people",dom:P,app:"General",q:"A team member is consistently late to meetings, disrupting the team. What should the PM do FIRST?",o:["Speak with them privately to understand the cause","Call it out in front of the team","Remove them from meetings","Report them to HR immediately"],a:0,e:"Address performance issues privately first to understand root causes before escalating; public call-outs damage trust."},
+{cat:"people",dom:P,app:"General",q:"A safety crisis demands an immediate, decisive call with no time for consensus. The MOST appropriate leadership style is:",o:["Directive (temporarily), to protect safety","Laissez-faire","Consensus-driven democratic","Hands-off delegation"],a:0,e:"A directive style is appropriate briefly in genuine emergencies, especially where safety is at stake; return to collaboration afterward."},
+{cat:"business",dom:B,app:"General",q:"A project's output will become a regulated medical device. When should compliance requirements be identified?",o:["As early as possible, during planning","Only after the first prototype","At closing","Only if an audit occurs"],a:0,e:"Compliance requirements are identified early and built into scope, design, and quality — retrofitting them later is costly and risky."},
+{cat:"business",dom:B,app:"General",q:"Before closing, the PM should ensure the deliverable and its knowledge are:",o:["Transitioned to operations with training and support","Archived and forgotten","Kept within the project team","Deleted to save space"],a:0,e:"Effective transition hands the product, documentation, and knowledge to operations/support so benefits can be realized and sustained."}
+];
+
+/* ---------- STATE ---------- */
+const CATS={
+  people:{name:"People",cls:"a-people",dot:"a-people",icon:"👥",desc:"Conflict, leadership, teams & stakeholders — 33% of the exam"},
+  process:{name:"Process",cls:"a-process",dot:"a-process",icon:"⚙",desc:"Scope, schedule, risk, quality & procurement — 41%"},
+  business:{name:"Business Environment",cls:"a-business",dot:"a-business",icon:"◎",desc:"Governance, compliance, benefits, ESG & AI — 26%"},
+  agile:{name:"Agile & Hybrid",cls:"a-agile",dot:"",icon:"∞",desc:"Scrum, Kanban, servant leadership & tailoring — 60% of items"},
+  formula:{name:"Formulas",cls:"a-formula",dot:"",icon:"∑",desc:"Earned value, PERT, channels & selection metrics"}
+};
+const LEVELS=[
+  {xp:0,name:"Initiating"},{xp:120,name:"Planning"},{xp:320,name:"Executing"},
+  {xp:640,name:"Monitoring"},{xp:1040,name:"Closing"},{xp:1600,name:"PMP-Ready"}
+];
+const TIPS=[
+  "Read the <b>last sentence first</b>, then the scenario. Know what is being asked before the distractors shape your thinking.",
+  "Roughly <b>half the exam</b> can be answered from mindset alone: assess before acting, collaborate over command, proactive over reactive.",
+  "A change request? The answer is almost always <b>integrated change control</b> — never implement or reject on the spot.",
+  "When a scenario asks 'first,' find where the team is on the <b>five-step ladder</b> and take the very next step.",
+  "<b>Classify the approach</b> — predictive, agile, or hybrid — before you answer. It flips the correct response.",
+  "Safety, legal, or compliance threat? <b>Act immediately</b> to stop the harm, analyze afterward. That's the one exception to 'assess first.'",
+  "Servant leaders <b>remove impediments</b> and help the team find answers — they never hand down the solution.",
+  "EV is always <b>first</b> in both variance formulas and the <b>numerator</b> of both indices. That one hook covers most EVM items."
+];
+let st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
+let session=null, timerId=null;
+
+function load(){
+  try{const s=JSON.parse(localStorage.getItem("pmpft"));if(s)st=Object.assign(st,s);}catch(e){}
+  // daily streak
+  const today=new Date().toISOString().slice(0,10);
+  if(st.lastDay){
+    const diff=(new Date(today)-new Date(st.lastDay))/86400000;
+    if(diff>=2)st.streak=0;
+  }
+}
+function save(){try{localStorage.setItem("pmpft",JSON.stringify(st));}catch(e){}}
+function markDay(){
+  const today=new Date().toISOString().slice(0,10);
+  if(st.lastDay!==today){st.streak=(st.lastDay&&( (new Date(today)-new Date(st.lastDay))/86400000)===1)?st.streak+1:1;if(!st.lastDay)st.streak=1;st.lastDay=today;}
+}
+function levelFor(xp){let l=0;for(let i=0;i<LEVELS.length;i++)if(xp>=LEVELS[i].xp)l=i;return l;}
+function readiness(){return st.answered<5?0:Math.round(st.correct/st.answered*100);}
+function verdictText(p){
+  if(st.answered<5)return"Take a set to measure your readiness";
+  if(p>=85)return"🎯 Exam ready — book it with confidence";
+  if(p>=75)return"On track to pass — keep the streak going";
+  if(p>=67)return"Getting close — tighten your weak domains";
+  return"Keep studying — focus on your lowest domain";
+}
+
+/* ---------- NAV ---------- */
+const SCREENS=["home","quiz","results","review","toc"];
+function go(id){SCREENS.forEach(s=>document.getElementById(s).hidden=(s!==id));window.scrollTo(0,0);}
+function refreshHome(){
+  const lv=levelFor(st.xp);
+  document.getElementById("lvlnum").textContent=lv+1;
+  document.getElementById("lvlname").textContent=LEVELS[lv].name;
+  document.getElementById("xpval").textContent=st.xp+" XP";
+  const p=readiness();
+  setRing("ring",p,515);
+  document.getElementById("readypct").textContent=p+"%";
+  document.getElementById("verdict").textContent=verdictText(p);
+  document.getElementById("s-ans").textContent=st.answered;
+  document.getElementById("s-acc").textContent=st.answered?Math.round(st.correct/st.answered*100)+"%":"—";
+  document.getElementById("s-streak").textContent=st.streak;
+  document.getElementById("tip").innerHTML=TIPS[Math.floor(Math.random()*TIPS.length)];
+  const seenN=Object.keys(st.seen||{}).length;
+  document.getElementById("qbanktotal").textContent=QB.length+" questions"+(seenN?" · "+Math.min(seenN,QB.length)+" seen":"");
+  bestTag("best-mock","mock");bestTag("best-quick","quick");
+}
+function bestTag(elId,key){
+  const el=document.getElementById(elId);const b=st.best[key];
+  if(b!=null){el.textContent="Best "+b+"%";el.style.color=b>=75?"var(--good)":"var(--muted)";}else el.textContent="";
+}
+function setRing(id,pct,circ){
+  const c=document.getElementById(id);
+  c.style.transition="stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1)";
+  c.style.strokeDashoffset=circ-(circ*pct/100);
+}
+
+/* area modes */
+function buildAreas(){
+  const wrap=document.getElementById("areaModes");wrap.innerHTML="";
+  Object.keys(CATS).forEach(k=>{
+    const c=CATS[k];const n=QB.filter(q=>q.cat===k).length;const best=st.best[k];
+    const b=document.createElement("button");b.className="mode";b.onclick=()=>start(k);
+    b.innerHTML=`<div class="ic ${c.cls}">${c.icon}</div>
+      <div class="tx"><b>${c.name}</b><p>${c.desc}</p></div>
+      <div class="meta">${n} Q<span class="best" style="color:${best>=75?'var(--good)':'var(--muted)'}">${best!=null?'Best '+best+'%':''}</span></div>`;
+    wrap.appendChild(b);
+  });
+}
+
+/* ---------- QUIZ ENGINE ---------- */
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function pick(arr,n){return shuffle(arr).slice(0,n);}
+
+/* unseen-first draw: serves fresh questions until a pool is exhausted, then reshuffles */
+function draw(poolIdx,n){
+  if(n>=poolIdx.length){poolIdx.forEach(i=>st.seen[i]=1);return shuffle(poolIdx.slice());}
+  let unseen=poolIdx.filter(i=>!st.seen[i]);
+  let chosen;
+  if(unseen.length>=n){chosen=pick(unseen,n);}
+  else{
+    chosen=shuffle(unseen);                 // take every remaining unseen
+    poolIdx.forEach(i=>{delete st.seen[i];}); // cycle: this pool is fresh again
+    const rem=poolIdx.filter(i=>chosen.indexOf(i)<0);
+    chosen=chosen.concat(pick(rem,n-chosen.length));
+  }
+  chosen.forEach(i=>st.seen[i]=1);
+  return chosen;
+}
+function idxByCat(c){const a=[];QB.forEach((q,i)=>{if(q.cat===c)a.push(i);});return a;}
+function idxByDom(d){const a=[];QB.forEach((q,i)=>{if(q.dom===d)a.push(i);});return a;}
+function buildQueue(mode){
+  let idxs;
+  if(mode==="quick")idxs=draw(QB.map((_,i)=>i),10);
+  else if(mode==="mock"){
+    const target={People:13,Process:16,Business:11};
+    let out=[];
+    for(const d in target)out=out.concat(draw(idxByDom(d),target[d]));
+    idxs=shuffle(out);
+  }else{
+    const pool=idxByCat(mode);
+    idxs=draw(pool,Math.min(pool.length,15));
+  }
+  save();
+  return idxs.map(i=>QB[i]);
+}
+function modeTitle(mode){
+  if(mode==="quick")return"Quick 10";
+  if(mode==="mock")return"Mock Exam";
+  return CATS[mode].name;
+}
+function start(mode){
+  markDay();
+  const queue=buildQueue(mode);
+  session={mode,title:modeTitle(mode),queue,idx:0,answers:[],correct:0,start:Date.now()};
+  go("quiz");
+  // timer only for mock
+  const t=document.getElementById("qtimer");
+  if(mode==="mock"){t.hidden=false;startTimer();}else{t.hidden=true;stopTimer();}
+  renderQ();
+}
+function startTimer(){stopTimer();timerId=setInterval(()=>{
+  const s=Math.floor((Date.now()-session.start)/1000);
+  const m=String(Math.floor(s/60)).padStart(2,"0"),ss=String(s%60).padStart(2,"0");
+  document.getElementById("qtimer").textContent=m+":"+ss;
+},1000);}
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null;}}
+
+function renderQ(){
+  const q=session.queue[session.idx];const n=session.queue.length;
+  document.getElementById("qcount").textContent=(session.idx+1)+"/"+n;
+  document.getElementById("pfill").style.width=((session.idx)/n*100)+"%";
+  // chips
+  const domCls=q.dom==="People"?"a-people":q.dom==="Process"?"a-process":"a-business";
+  const domColor=q.dom==="People"?"var(--people)":q.dom==="Process"?"var(--process)":"var(--business)";
+  document.getElementById("qchips").innerHTML=
+    `<span class="chip dom" style="background:${domColor}">${q.dom}</span>`+
+    `<span class="chip app">${q.app}</span>`;
+  document.getElementById("qtext").textContent=q.q;
+  const opts=document.getElementById("qopts");opts.innerHTML="";
+  const keys=["A","B","C","D","E"];
+  const order=shuffle(q.o.map((_,i)=>i));   // randomize option positions each view
+  session.order=order;
+  session.correctDisp=order.indexOf(q.a);
+  order.forEach((orig,disp)=>{
+    const b=document.createElement("button");b.className="opt";
+    b.innerHTML=`<span class="key">${keys[disp]}</span><span>${q.o[orig]}</span>`;
+    b.onclick=()=>answer(disp,b);opts.appendChild(b);
+  });
+  document.getElementById("qexplain").innerHTML="";
+  document.getElementById("qnav").hidden=true;
+}
+function answer(i,btn){
+  const q=session.queue[session.idx];
+  const opts=[...document.getElementById("qopts").children];
+  const correct=session.correctDisp;
+  opts.forEach((o,idx)=>{o.disabled=true;
+    if(idx===correct)o.classList.add("correct");
+    else if(idx===i)o.classList.add("wrong");
+    else o.classList.add("dim");
+  });
+  const right=i===correct;
+  session.answers.push({q,order:session.order.slice(),chosenDisp:i,correctDisp:correct,right});
+  if(right)session.correct++;
+  // global stats
+  st.answered++;if(right)st.correct++;
+  st.domStats[q.dom][0]++;if(right)st.domStats[q.dom][1]++;
+  st.xp+=right?12:3;
+  save();
+  // explanation
+  const ex=document.getElementById("qexplain");
+  ex.className="explain "+(right?"ok":"no");
+  ex.innerHTML=`<div class="vhead">${right?"✓ Correct":"✕ Not quite"}</div><div>${q.e}</div>`;
+  const last=session.idx===session.queue.length-1;
+  document.getElementById("nextbtn").textContent=last?"See results →":"Next →";
+  document.getElementById("qnav").hidden=false;
+  document.getElementById("pfill").style.width=((session.idx+1)/session.queue.length*100)+"%";
+  // live level chip
+  document.getElementById("xpval").textContent=st.xp+" XP";
+  const lv=levelFor(st.xp);document.getElementById("lvlnum").textContent=lv+1;
+  document.getElementById("lvlname").textContent=LEVELS[lv].name;
+}
+function next(){
+  if(session.idx<session.queue.length-1){session.idx++;renderQ();window.scrollTo(0,0);}
+  else finish();
+}
+function confirmQuit(){stopTimer();refreshHome();go("home");}
+
+/* ---------- RESULTS ---------- */
+function finish(){
+  stopTimer();
+  const n=session.queue.length,c=session.correct;const pct=Math.round(c/n*100);
+  // best
+  const key=session.mode;
+  if(st.best[key]==null||pct>st.best[key])st.best[key]=pct;
+  // badges
+  const newBadges=[];
+  const badgeMap={people:"People Pro",process:"Process Master",business:"Business Savvy",agile:"Agile Ace",formula:"Numbers Game",quick:"Warmed Up",mock:"Mock Slayer"};
+  if(pct>=80&&badgeMap[key]&&!st.badges.includes(badgeMap[key])){st.badges.push(badgeMap[key]);newBadges.push(badgeMap[key]);}
+  if(key==="mock"&&!st.badges.includes("Mock Slayer")){st.badges.push("Mock Slayer");newBadges.push("Mock Slayer");}
+  if(readiness()>=85&&!st.badges.includes("Exam Ready")){st.badges.push("Exam Ready");newBadges.push("Exam Ready");}
+  if(st.xp>=1600&&!st.badges.includes("Max Level")){st.badges.push("Max Level");newBadges.push("Max Level");}
+  st.xp+= (key==="mock"?40:15); // completion bonus
+  save();
+  // render
+  document.getElementById("r-mode").textContent=session.title.toUpperCase()+" · "+n+" QUESTIONS";
+  const titles=pct>=85?"Outstanding!":pct>=75?"Strong work!":pct>=60?"Good progress":"Keep going";
+  document.getElementById("r-title").textContent=titles;
+  setRing("rring",pct,402);
+  document.getElementById("r-score").textContent=pct+"%";
+  document.getElementById("r-frac").textContent=c+" / "+n;
+  // domain bars for this session
+  const bySession={People:[0,0],Process:[0,0],Business:[0,0]};
+  session.answers.forEach(a=>{bySession[a.q.dom][0]++;if(a.right)bySession[a.q.dom][1]++;});
+  const dom=document.getElementById("r-dombars");dom.innerHTML="";
+  const dcol={People:"var(--people)",Process:"var(--process)",Business:"var(--business)"};
+  let any=false;
+  for(const d in bySession){const[tot,ok]=bySession[d];if(!tot)continue;any=true;
+    const p=Math.round(ok/tot*100);
+    const row=document.createElement("div");row.className="dombar";
+    row.innerHTML=`<span class="nums tnum">${ok}/${tot}</span><b>${d}</b>
+      <div class="track"><i style="width:${p}%;background:${dcol[d]}"></i></div>`;
+    dom.appendChild(row);
+  }
+  document.getElementById("r-dombox").style.display=any?"block":"none";
+  // message
+  const msg=pct>=85?"You are hitting exam-ready territory. Do two or three full-length sessions to build stamina, then book it.":
+    pct>=75?"Above the pass threshold. Keep drilling your weakest domain and the new question formats.":
+    pct>=67?"Right at the lower edge. Review every miss — including the ones you got right for the wrong reason.":
+    "Below the pass zone for now. Reread the explanations, revisit the Study Map, and practice your lowest domain next.";
+  document.getElementById("r-msg").textContent=msg;
+  // badge banner
+  const bb=document.getElementById("r-badge");
+  if(newBadges.length){bb.hidden=false;bb.innerHTML="🏅 New badge: "+newBadges.join(" · ");}else bb.hidden=true;
+  // all earned
+  const eb=document.getElementById("r-earnedbox"),e=document.getElementById("r-earned");
+  if(st.badges.length){eb.hidden=false;e.innerHTML=st.badges.map(x=>`<span class="btag">🏅 ${x}</span>`).join("");}else eb.hidden=true;
+  go("results");
+  if(pct>=75)fireConfetti();
+}
+function retry(){start(session.mode);}
+function reviewAnswers(){
+  const list=document.getElementById("reviewList");list.innerHTML="";
+  const keys=["A","B","C","D","E"];
+  session.answers.forEach((a,i)=>{
+    const q=a.q;
+    const card=document.createElement("div");card.className="card";card.style.padding="14px 15px";
+    const order=a.order||q.o.map((_,x)=>x);
+    let opts=order.map((orig,disp)=>{
+      let cls="",tag="";
+      if(disp===a.correctDisp){cls="color:var(--good);font-weight:700";tag=" ✓";}
+      else if(disp===a.chosenDisp){cls="color:var(--bad);font-weight:700";tag=" ✕ your answer";}
+      return `<div style="${cls};font-size:13.5px;padding:3px 0">${keys[disp]}. ${q.o[orig]}${tag}</div>`;
+    }).join("");
+    card.innerHTML=`<div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:6px">
+      Q${i+1} · ${q.dom}${a.right?' · <span style="color:var(--good)">Correct</span>':' · <span style="color:var(--bad)">Missed</span>'}</div>
+      <div style="font-family:var(--dsp);font-weight:600;font-size:15px;margin-bottom:8px">${q.q}</div>
+      ${opts}
+      <div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">${q.e}</div>`;
+    list.appendChild(card);
+  });
+  go("review");
+}
+
+/* ---------- TOC ---------- */
+const PARTS=[
+  ["0","Start Here","How to use the guide · the one thing to internalise · what changed on 9 July 2026",""],
+  ["1","The Exam Itself","Format, domain weightings, question types, pacing and scoring — all verified against PMI's current outline.",""],
+  ["2","Eligibility, Application &amp; the Audit","The four paths, the overlap rule, writing an application that passes, the audit, and costs.",""],
+  ["3","What to Buy, What to Skip","The minimum viable stack, courses, question banks, free resources — and the expensive things to skip.",""],
+  ["4","Study Plans","Three tracks — 3 weeks, 7 weeks, 4 months — with readiness gates and the habits that separate passes from fails.",""],
+  ["5","The PMI Mindset","The four meta-rules, the five-step scenario ladder, and 100+ decision rules by situation. Highest-value section in the guide.","people"],
+  ["6","How to Answer Any Question","The reading method, first vs next vs best, detecting the approach, and the red and green flags.",""],
+  ["7","The Exam Content Outline","All 26 tasks across the three domains, and what each one means on the exam.","domains"],
+  ["8","Agile &amp; Hybrid","Scrum, Kanban, estimation and metrics, servant leadership, and choosing and tailoring.","agile"],
+  ["9","Predictive Mechanics","Process structure, principles and domains, schedule mechanics, and risk responses.","process"],
+  ["10","Formulas &amp; Calculations","Earned value, estimation, channels, risk, quality, procurement, financial and agile math.","formula"],
+  ["11","Conflict, Leadership &amp; Motivation","The five conflict modes, Tuckman, motivation theories, power and negotiation.","people"],
+  ["12","The Distinctions That Decide Questions","The confused pairs, contract types, RACI, stakeholder models and decomposition.","process"],
+  ["13","Exam Day","Test centre vs online, the brain dump, managing four hours, and the last 72 hours.",""],
+  ["14","If You Fail, and What Comes After","Why capable people fail, reading a score report, renewal, and what it is worth.",""],
+  ["A","The One-Page Memory Sheet","Everything worth memorising, on a single page.","appendix"],
+  ["B","The 30-Day Countdown","A tick-list for the final month. Print it, tick it.","appendix"],
+  ["C","Links","PMI, free practice, free learning, and the r/PMP threads worth reading.","appendix"]
+];
+function buildTOC(){
+  const el=document.getElementById("tocList");el.innerHTML="";
+  PARTS.forEach(([num,title,body,link])=>{
+    const d=document.createElement("details");d.className="part"+(isNaN(num)?" appendix":"");
+    let pr="";
+    if(link==="domains")pr=`<div class="pr"><button class="btn sec" style="padding:10px" onclick="event.preventDefault();go('home')">Practice all three domains →</button></div>`;
+    else if(link&&CATS[link])pr=`<div class="pr"><button class="btn sec" style="padding:10px" onclick="event.preventDefault();start('${link}')">Practice ${CATS[link].name} →</button></div>`;
+    d.innerHTML=`<summary><div class="num">${num}</div>
+      <div class="ht"><b>${title}</b><span>${body.replace(/<[^>]+>/g,'').slice(0,46)}…</span></div>
+      <div class="plus">+</div></summary>
+      <div class="body">${body}${pr}</div>`;
+    el.appendChild(d);
+  });
+}
+
+/* ---------- THEME / RESET ---------- */
+function toggleTheme(){
+  const cur=document.documentElement.getAttribute("data-theme");
+  const dark=cur?cur==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
+  document.documentElement.setAttribute("data-theme",dark?"light":"dark");
+  try{localStorage.setItem("pmpft-theme",dark?"light":"dark");}catch(e){}
+}
+function resetProgress(){
+  st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
+  save();refreshHome();buildAreas();
+}
+
+/* ---------- CONFETTI ---------- */
+function fireConfetti(){
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  const cv=document.getElementById("fx");cv.hidden=false;
+  const ctx=cv.getContext("2d");const DPR=Math.min(2,devicePixelRatio||1);
+  cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;ctx.scale(DPR,DPR);
+  const cols=["#6d4be0","#ff5d8f","#11b3a6","#e8961a","#9b86ff"];
+  let parts=[];for(let i=0;i<120;i++)parts.push({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*0.35,
+    vx:(Math.random()-.5)*7,vy:Math.random()*-9-3,g:.26,r:Math.random()*6+3,
+    c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.3,life:0});
+  let t=0;(function anim(){t++;ctx.clearRect(0,0,cv.width,cv.height);
+    parts.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.life++;
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;
+      ctx.globalAlpha=Math.max(0,1-p.life/90);ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);ctx.restore();});
+    if(t<95)requestAnimationFrame(anim);else{cv.hidden=true;ctx.clearRect(0,0,cv.width,cv.height);}
+  })();
+}
+
+/* ---------- INIT ---------- */
+(function(){
+  try{const th=localStorage.getItem("pmpft-theme");if(th)document.documentElement.setAttribute("data-theme",th);}catch(e){}
+  load();buildAreas();buildTOC();refreshHome();go("home");
+})();
+</script>
+
+<script>
+/* Service worker: offline cache + auto update-check. When a new version is deployed,
+   a small "New version available" bar appears; tapping Refresh loads it. */
+function pmpUpdateToast(reg){
+  if(document.getElementById('pmp-upd')) return;
+  var bar=document.createElement('div'); bar.id='pmp-upd';
+  bar.setAttribute('style','position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:9999;background:#6d4be0;color:#fff;padding:11px 14px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;gap:12px;align-items:center;font:600 14px/1.2 system-ui,-apple-system,sans-serif;max-width:92vw');
+  var s=document.createElement('span'); s.textContent='New version available';
+  var b=document.createElement('button'); b.textContent='Refresh';
+  b.setAttribute('style','background:#fff;color:#4a2fb8;border:none;border-radius:10px;padding:8px 13px;font:700 14px system-ui;cursor:pointer');
+  b.onclick=function(){ if(reg.waiting) reg.waiting.postMessage('SKIP_WAITING'); };
+  bar.appendChild(s); bar.appendChild(b); document.body.appendChild(bar);
+}
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./service-worker.js').then(function (reg) {
+      function check(){ try{ reg.update(); }catch(e){} }
+      setInterval(check, 60*60*1000);                                   // hourly
+      document.addEventListener('visibilitychange', function(){ if(!document.hidden) check(); }); // on re-focus
+      if (reg.waiting && navigator.serviceWorker.controller) pmpUpdateToast(reg);
+      reg.addEventListener('updatefound', function () {
+        var nw = reg.installing; if(!nw) return;
+        nw.addEventListener('statechange', function () {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) pmpUpdateToast(reg);
+        });
+      });
+    }).catch(function(){});
+    var refreshing=false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(refreshing) return; refreshing=true; location.reload();
+    });
+  });
+}
+</script>
+</body>
+</html>

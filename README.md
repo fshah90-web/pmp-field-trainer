@@ -1,24 +1,36 @@
 # PMP Field Trainer
 
-A gamified PMP exam-prep app: 300 current (2026-outline) questions, a weighted mock
-exam, practice by domain, a study map, and progress tracking. Two ways to ship it:
+A gamified PMP exam-prep app built on the **2026 PMI Examination Content Outline** (the exam PMI
+launched 9 July 2026: People 33% / Process 41% / Business Environment 26%, 180 questions /
+240 minutes, PMBOK 8, ~40% predictive / 60% agile-hybrid).
 
-## `web/` — install it on phones now (no App Store)
-A complete Progressive Web App. Put it on any static https host and anyone can "Add to
-Home Screen" and run it full-screen, offline.
-- **Fastest:** drag the `web/` folder onto https://app.netlify.com/drop → you get a live link.
-- iPhone: open the link in Safari → **Share → Add to Home Screen**.
-- Android: Chrome → **Install app**.
-- It now **auto-checks for updates**: when you redeploy, installed devices show a
-  "New version available — Refresh" bar. (When you change `index.html`, bump `pmpft-v2`
-  to `pmpft-v3` in `service-worker.js` so devices fetch the new files.)
-- Full details: `web/DEPLOY.md`.
+**Live:** https://fshah90-web.github.io/pmp-field-trainer/web/
+(On iPhone: open in Safari → Share → Add to Home Screen. Works offline.)
 
-## `capacitor/` — build it for the Apple App Store
-Wraps the same app as a native iOS app via Capacitor, to submit to the App Store.
-Needs a Mac with Xcode and an Apple Developer account. Step-by-step: `capacitor/SETUP.md`.
-A 1024×1024 app icon is included (`capacitor/icon-1024.png`).
+## What's in it
+- **300** original, scenario-style questions, each with an explanation.
+- **Mock Exam** — 40 questions sampled at true exam weighting (13 People / 16 Process / 11 Business).
+- **Quick 10** and **practice by domain** (People, Process, Business, Agile & Hybrid, Formulas).
+- **Lightning Round** — 60-second game mode with combo multipliers, lives, and a high score.
+- **Review Misses** — spaced repetition (Leitner boxes) that resurfaces questions you got wrong
+  until they stick.
+- **Retention layer** — daily goal, streaks with a streak-freeze, XP/levels, and an Awards screen
+  with 18 badges.
+- **Unseen-first rotation** — back-to-back sets don't repeat; answer options shuffle every view.
+- Progress is saved per-device in the browser (no account yet — see the roadmap).
+
+## Repo layout
+- `web/` — the PWA that's deployed on GitHub Pages. Service worker handles offline + a
+  "new version available" update prompt. Deploy: see `web/DEPLOY.md`.
+- `capacitor/` — Capacitor scaffold to wrap the app for the Apple App Store. Steps in
+  `capacitor/SETUP.md`.
+- `docs/PLATFORM.md` — **architecture & roadmap** for turning this into an accounts-based
+  platform (sync, leaderboards, push, cohorts, monetization). Read this before building the backend.
+
+## Updating
+Edit files and `git push` → GitHub Pages redeploys. When you change `web/index.html`, bump the
+cache name in `web/service-worker.js` (e.g. `pmpft-v4` → `v5`) so installed devices pick up the
+new version.
 
 ---
 Built from *The PMP Field Guide* — Professor Farooq A. Shah, MPM, PMP, ACP, PCT, LSSBB.
-Aligned to the PMI 2026 Examination Content Outline (exam of 9 July 2026).

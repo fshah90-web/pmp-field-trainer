@@ -1,5 +1,5 @@
 /* PMP Field Trainer service worker */
-const CACHE = 'pmpft-v3';
+const CACHE = 'pmpft-v4';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest',
   './icon-192.png','./icon-512.png','./icon-512-maskable.png','./apple-touch-icon.png','./favicon-64.png'

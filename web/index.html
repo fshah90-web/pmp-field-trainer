@@ -314,6 +314,11 @@ nav.tabs button.on{color:var(--brand-ink)}
         <div class="tx"><b>Lightning Round</b><p>Beat the clock — combos, lives, high score</p></div>
         <div class="meta" id="best-lightning"></div>
       </button>
+      <button class="mode" onclick="startReview()">
+        <div class="ic" style="background:linear-gradient(135deg,#6d4be0,#11b3a6)">↺</div>
+        <div class="tx"><b>Review Misses</b><p>Spaced repetition on the questions you got wrong</p></div>
+        <div class="meta" id="review-meta"></div>
+      </button>
     </div>
 
     <div class="section-head"><h2>Practice by area</h2></div>
@@ -445,6 +450,7 @@ nav.tabs button.on{color:var(--brand-ink)}
       <div class="stat"><b class="tnum" id="a-ans">0</b><small>Answered</small></div>
       <div class="stat"><b class="tnum" id="a-acc">—</b><small>Accuracy</small></div>
     </div>
+    <div class="muted" style="font-size:12.5px;margin-top:10px" id="a-extra"></div>
     <div class="section-head"><h2 style="font-size:18px">Badges</h2><span class="muted" style="font-size:12px" id="a-badgecount"></span></div>
     <div class="ach-grid" id="achGrid"></div>
     <footer>Keep a daily streak and your badges fill in. New ones unlock as you practice.</footer>
@@ -807,22 +813,33 @@ const TIPS=[
   "Servant leaders <b>remove impediments</b> and help the team find answers — they never hand down the solution.",
   "EV is always <b>first</b> in both variance formulas and the <b>numerator</b> of both indices. That one hook covers most EVM items."
 ];
-let st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},daily:{date:null,count:0,goal:15},lightningBest:0,domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
+let st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},daily:{date:null,count:0,goal:15},lightningBest:0,misses:{},freezes:1,mastered:0,domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
 let session=null, timerId=null;
 
 function load(){
   try{const s=JSON.parse(localStorage.getItem("pmpft"));if(s)st=Object.assign(st,s);}catch(e){}
-  // daily streak
+  // streak: broken only when the gap is too big for a freeze to cover
   const today=new Date().toISOString().slice(0,10);
   if(st.lastDay){
-    const diff=(new Date(today)-new Date(st.lastDay))/86400000;
-    if(diff>=2)st.streak=0;
+    const gap=Math.round((new Date(today)-new Date(st.lastDay))/86400000);
+    if(gap>=3 || (gap===2 && !(st.freezes>0))) st.streak=0;
   }
 }
 function save(){try{localStorage.setItem("pmpft",JSON.stringify(st));}catch(e){}}
 function markDay(){
   const today=new Date().toISOString().slice(0,10);
-  if(st.lastDay!==today){st.streak=(st.lastDay&&( (new Date(today)-new Date(st.lastDay))/86400000)===1)?st.streak+1:1;if(!st.lastDay)st.streak=1;st.lastDay=today;}
+  if(st.lastDay===today)return;
+  st._freezeUsed=false;
+  if(!st.lastDay){st.streak=1;}
+  else{
+    const gap=Math.round((new Date(today)-new Date(st.lastDay))/86400000);
+    if(gap===1)st.streak+=1;
+    else if(gap===2 && st.freezes>0){st.freezes-=1;st.streak+=1;st._freezeUsed=true;}
+    else st.streak=1;
+  }
+  st.lastDay=today;
+  if(st.streak>0 && st.streak%7===0 && st.freezes<2)st.freezes+=1;   // earn a freeze each week
+  if(st._freezeUsed)setTimeout(()=>miniToast("🛡 Streak freeze used — streak saved"),450);
 }
 function levelFor(xp){let l=0;for(let i=0;i<LEVELS.length;i++)if(xp>=LEVELS[i].xp)l=i;return l;}
 function readiness(){return st.answered<5?0:Math.round(st.correct/st.answered*100);}
@@ -861,6 +878,9 @@ function refreshHome(){
   bestTag("best-mock","mock");bestTag("best-quick","quick");
   updateDaily();
   const lb=document.getElementById("best-lightning");if(lb)lb.innerHTML=st.lightningBest?("Best "+st.lightningBest):"";
+  const rm=document.getElementById("review-meta");
+  if(rm){const tot=missCount(),due=dueMisses().length;
+    rm.innerHTML= tot? (due?('<span style="color:var(--business);font-weight:800">'+due+' due</span>'):(tot+' tracked')) : 'As you miss';}
 }
 function bestTag(elId,key){
   const el=document.getElementById(elId);const b=st.best[key];
@@ -908,6 +928,13 @@ function idxByCat(c){const a=[];QB.forEach((q,i)=>{if(q.cat===c)a.push(i);});ret
 function idxByDom(d){const a=[];QB.forEach((q,i)=>{if(q.dom===d)a.push(i);});return a;}
 function buildQueue(mode){
   let idxs;
+  if(mode==="misses"){
+    let due=dueMisses();
+    if(due.length===0)due=Object.keys(st.misses||{}).map(Number).sort((a,b)=>st.misses[a].due-st.misses[b].due);
+    idxs=shuffle(due).slice(0,20);
+    save();
+    return idxs.map(i=>QB[i]);
+  }
   if(mode==="quick")idxs=draw(QB.map((_,i)=>i),10);
   else if(mode==="mock"){
     const target={People:13,Process:16,Business:11};
@@ -924,6 +951,7 @@ function buildQueue(mode){
 function modeTitle(mode){
   if(mode==="quick")return"Quick 10";
   if(mode==="mock")return"Mock Exam";
+  if(mode==="misses")return"Review Misses";
   return CATS[mode].name;
 }
 function start(mode){
@@ -983,6 +1011,7 @@ function answer(i,btn){
   st.answered++;if(right)st.correct++;
   st.domStats[q.dom][0]++;if(right)st.domStats[q.dom][1]++;
   st.xp+=right?12:3;
+  const _qi=QB.indexOf(q); if(right)promoteMiss(_qi); else addMiss(_qi);
   trackDaily();
   save();
   awardBadges().forEach(b=>miniToast("🏅 "+b));
@@ -1129,7 +1158,7 @@ function toggleTheme(){
   try{localStorage.setItem("pmpft-theme",dark?"light":"dark");}catch(e){}
 }
 function resetProgress(){
-  st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},daily:{date:null,count:0,goal:15},lightningBest:0,domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
+  st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},daily:{date:null,count:0,goal:15},lightningBest:0,misses:{},freezes:1,mastered:0,domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
   save();refreshHome();buildAreas();
 }
 
@@ -1169,7 +1198,8 @@ const BADGES=[
   {id:"Mock Slayer",icon:"◆",desc:"Finish a full Mock Exam"},
   {id:"Lightning",icon:"⚡",desc:"Score 150+ in a Lightning Round"},
   {id:"Exam Ready",icon:"🎯",desc:"Reach 85% exam readiness"},
-  {id:"Max Level",icon:"♛",desc:"Reach the PMP-Ready level"}
+  {id:"Max Level",icon:"♛",desc:"Reach the PMP-Ready level"},
+  {id:"Comeback Kid",icon:"↺",desc:"Master 10 questions you once missed"}
 ];
 function earn(id,out){if(!st.badges.includes(id)){st.badges.push(id);out.push(id);}}
 function awardBadges(){
@@ -1182,6 +1212,7 @@ function awardBadges(){
   if(st.daily && st.daily.date===todayStr() && st.daily.count>=(st.daily.goal||15))earn("Daily Dedication",out);
   if(st.xp>=1600)earn("Max Level",out);
   if(readiness()>=85)earn("Exam Ready",out);
+  if((st.mastered||0)>=10)earn("Comeback Kid",out);
   if(out.length)save();
   return out;
 }
@@ -1203,6 +1234,17 @@ function miniToast(txt){
     document.body.appendChild(t);}
   t.textContent=txt;t.style.opacity="1";clearTimeout(t._h);t._h=setTimeout(()=>{t.style.opacity="0";},1800);
 }
+/* ---- spaced repetition (Leitner) for missed questions ---- */
+function addMiss(qi){ if(qi<0)return; if(!st.misses)st.misses={}; st.misses[qi]={box:1,due:Date.now()}; }
+function promoteMiss(qi){
+  if(qi<0||!st.misses||!st.misses[qi])return;
+  const nb=st.misses[qi].box+1; const days={2:1,3:3,4:7};
+  if(nb>4){ delete st.misses[qi]; st.mastered=(st.mastered||0)+1; return; }   // graduated — mastered
+  st.misses[qi]={box:nb,due:Date.now()+days[nb]*86400000};
+}
+function dueMisses(){ if(!st.misses)return []; const now=Date.now(); return Object.keys(st.misses).filter(qi=>st.misses[qi].due<=now).map(Number); }
+function missCount(){ return st.misses?Object.keys(st.misses).length:0; }
+function startReview(){ if(missCount()===0){miniToast("No misses yet — they show up here after you miss a question");return;} start("misses"); }
 function renderAchievements(){
   const lv=levelFor(st.xp);
   document.getElementById("a-lv").textContent=lv+1;
@@ -1219,6 +1261,8 @@ function renderAchievements(){
   BADGES.forEach(b=>{const has=st.badges.includes(b.id);
     const d=document.createElement("div");d.className="ach "+(has?"earned":"locked");
     d.innerHTML=`<div class="ai">${b.icon}</div><b>${b.id}</b><p>${b.desc}</p>`;grid.appendChild(d);});
+  const ax=document.getElementById("a-extra");
+  if(ax)ax.innerHTML="🛡 "+(st.freezes||0)+" streak freeze"+((st.freezes===1)?"":"s")+" &nbsp;·&nbsp; ↺ "+missCount()+" in review ("+dueMisses().length+" due)";
 }
 /* ---- Lightning Round ---- */
 let lsession=null,lTimer=null,lastWasLightning=false;
@@ -1261,6 +1305,7 @@ function lAnswer(i,correct){
   if(right){lsession.combo++;lsession.correct++;const mult=Math.min(5,lsession.combo);lsession.score+=10*mult;st.xp+=5;
     const sc=document.getElementById("l-score");if(sc){sc.textContent=lsession.score;sc.classList.remove("pop");void sc.offsetWidth;sc.classList.add("pop");}
   }else{lsession.combo=0;lsession.lives--;st.xp+=1;}
+  const _qi=QB.indexOf(q); if(right)promoteMiss(_qi); else addMiss(_qi);
   trackDaily();save();awardBadges();
   document.getElementById("l-combo").textContent=lsession.combo>=2?("🔥 Combo ×"+Math.min(5,lsession.combo)):"";
   const lv=Math.max(0,lsession.lives);document.getElementById("l-lives").textContent="❤".repeat(lv)+"🖤".repeat(3-lv);

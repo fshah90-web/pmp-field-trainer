@@ -1,4 +1,4 @@
-# PMP Field Trainer — installable app (PWA)
+# PM Professor — installable app (PWA)
 
 This folder is a complete, self-contained web app. Drop it on any static host and
 it installs to a phone or desktop home screen, runs full-screen, and works offline

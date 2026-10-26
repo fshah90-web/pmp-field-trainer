@@ -1,8 +1,12 @@
-/* PMP Field Trainer service worker */
-const CACHE = 'pmpft-v4';
+/* PM Professor service worker */
+const CACHE = 'pmpft-v8-pm-professor';
 const ASSETS = [
   './','./index.html','./manifest.webmanifest',
-  './icon-192.png','./icon-512.png','./icon-512-maskable.png','./apple-touch-icon.png','./favicon-64.png'
+  './icon-192.png','./icon-512.png','./icon-512-maskable.png','./apple-touch-icon.png','./favicon-64.png',
+  './study.css','./study-content.js','./quiz-insights.js','./study.js',
+  './assets/professor/welcome.png','./assets/professor/think.png','./assets/professor/hint.png',
+  './assets/professor/explain.png','./assets/professor/celebrate.png',
+  './assets/professor/retry.png','./assets/professor/great-job.png'
 ];
 
 self.addEventListener('install', function (e) {
@@ -13,7 +17,7 @@ self.addEventListener('install', function (e) {
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+      return Promise.all(keys.filter(function (k) { return k.startsWith('pmpft-') && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
     }).then(function(){ return self.clients.claim(); })
   );
 });

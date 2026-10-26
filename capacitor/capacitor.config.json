@@ -1,6 +1,8 @@
 {
   "appId": "com.farooqshah.pmptrainer",
-  "appName": "PMP Field Trainer",
+  "appName": "PM Professor",
   "webDir": "www",
-  "server": { "iosScheme": "app" }
+  "server": {
+    "iosScheme": "app"
+  }
 }

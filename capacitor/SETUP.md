@@ -1,4 +1,4 @@
-# PMP Field Trainer — iOS / App Store build (Capacitor)
+# PM Professor — iOS / App Store build (Capacitor)
 
 This wraps the same web app as a native iOS app you can submit to the App Store.
 You run these steps on a Mac with Xcode installed.

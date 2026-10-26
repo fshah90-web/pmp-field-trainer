@@ -1,0 +1,146 @@
+/* Professor-led solo study. Keep the original app's palette and type family. */
+:root{--on-brand:#fff;--coach-ink:#4a2fb8}
+:root[data-theme="dark"]{--on-brand:#181231;--coach-ink:#d4c9ff}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--on-brand:#181231;--coach-ink:#d4c9ff}}
+button,input,select,summary,a{touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--brand);outline-offset:4px}
+.btn,.lvlchip .lv{color:var(--on-brand)}
+.btn.sec{color:var(--fg)}
+.chip.dom{background:var(--brand-soft)!important;color:var(--brand-ink)}
+.study-kicker{color:var(--brand-ink);font-size:12px;font-weight:800;letter-spacing:.035em;margin:0 0 7px}
+.study-title{font-size:29px;letter-spacing:-.7px;line-height:1.12;margin:0 0 10px}
+.study-sub{color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 20px}
+.professor-welcome{display:grid;grid-template-columns:146px 1fr;align-items:center;gap:8px;margin:0 -6px 14px}
+.professor-welcome .study-title{font-size:27px}
+.professor-welcome p{font-size:14px;line-height:1.5;margin:8px 0;color:var(--muted)}
+.professor{width:130px;aspect-ratio:1;flex:0 0 auto;background-repeat:no-repeat;background-size:200% 200%;background-position:100% 100%;align-self:center;contain:paint}
+.professor.animate{animation:professor-frames 2.8s steps(1,end) 1 both}
+.professor[data-state="welcome"]{background-image:url('./assets/professor/welcome.png')}
+.professor[data-state="think"]{background-image:url('./assets/professor/think.png');animation-duration:4s}
+.professor[data-state="hint"]{background-image:url('./assets/professor/hint.png')}
+.professor[data-state="explain"]{background-image:url('./assets/professor/explain.png')}
+.professor[data-state="celebrate"]{background-image:url('./assets/professor/celebrate.png')}
+.professor[data-state="retry"]{background-image:url('./assets/professor/retry.png')}
+.professor[data-state="great-job"]{background-image:url('./assets/professor/great-job.png');animation-duration:2s}
+@keyframes professor-frames{0%{background-position:0 0}25%{background-position:100% 0}50%{background-position:0 100%}75%,100%{background-position:100% 100%}}
+.coach{display:flex;align-items:center;gap:12px;margin:16px 0;padding:12px;background:var(--brand-soft);border-radius:16px}
+.coach .professor{width:76px}
+.coach-copy{min-width:0;flex:1}
+.coach-copy b{font-family:var(--dsp);font-size:16px;line-height:1.25;display:block;color:var(--coach-ink)}
+.coach-copy p{font-size:13px;line-height:1.55;margin:5px 0 0}
+.coach.small{padding:9px 10px;margin:10px 0 16px}
+.coach.small .professor{width:58px}
+.coach.small .coach-copy b{font-size:14px}
+.coach .text-action{font-size:12px;padding:5px 0;min-height:32px;margin-top:3px}
+.text-action{border:0;background:none;color:var(--brand-ink);font:700 14px var(--body);padding:8px 0;text-align:left;min-height:44px}
+.study-panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:19px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.study-panel h2{font-size:21px;line-height:1.2;margin:7px 0 9px}
+.study-panel p{font-size:14px;line-height:1.6;margin:0 0 14px}
+.study-panel .btn{font-size:15px;padding:13px 15px}
+.study-panel .panel-meta{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;color:var(--muted);font-size:12px}
+.study-panel .panel-meta b{color:var(--brand-ink);font-weight:700}
+.study-track{height:7px;border-radius:8px;background:var(--ring-track);overflow:hidden;margin:13px 0 8px}
+.study-track>span{display:block;height:100%;background:var(--brand);border-radius:8px}
+.study-caption{color:var(--muted);font-size:12px;line-height:1.5;margin:0}
+.study-links{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.study-panel p.study-caption{font-size:12px;margin:0}
+.study-links .text-action{font-size:12px;min-height:36px}
+.study-list{list-style:none;margin:0;padding:0}
+.study-list li{display:flex;gap:13px;align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}
+.study-list li:last-child{border-bottom:0}
+.study-list .step-check{width:28px;height:28px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:var(--brand-soft);color:var(--brand-ink);font-size:12px;font-weight:800}
+.study-list .step-copy{flex:1;min-width:0}
+.study-list b{font-size:14px;display:block}
+.study-list p{font-size:12px;color:var(--muted);margin:2px 0 0}
+.study-list button{border:0;background:none;color:var(--brand-ink);font:700 13px var(--body);min-height:44px;padding:5px 7px}
+.practice-stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px 0;margin:14px 0}
+.practice-stats>summary,.guide-outline>summary{cursor:pointer;font-size:14px;font-weight:700;color:var(--muted);min-height:30px;align-content:center}
+.practice-stats .hero{padding-top:10px}
+.practice-stats .ring-wrap{width:188px;transform:scale(.8);margin:-12px 0}
+.mission-list{display:grid;gap:12px}
+.mission-card{padding:17px 17px 15px;background:var(--surface);border:1px solid var(--border);border-radius:16px}
+.mission-card.current{border-color:var(--brand)}
+.mission-card .mission-line{display:flex;gap:8px;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;margin-bottom:7px}
+.mission-card h2{font-size:19px;line-height:1.25;margin-bottom:7px}
+.mission-card p{font-size:13px;color:var(--muted);line-height:1.55;margin:0 0 9px}
+.mission-card .mission-actions{display:flex;justify-content:space-between;gap:9px;align-items:center;flex-wrap:wrap}
+.mission-card .mission-actions button{width:auto;font-size:13px;padding:10px 16px;min-height:44px}
+.mission-status{font-size:12px;color:var(--brand-ink);font-weight:700}
+.lesson-block{padding:16px 0;border-top:1px solid var(--border)}
+.lesson-block h3{font-size:16px;line-height:1.3;margin:0 0 8px}
+.lesson-block p{font-size:14px;line-height:1.65;margin:0 0 10px}
+.lesson-highlight{background:var(--brand-soft);padding:14px 15px;border-radius:12px;font-size:14px;line-height:1.6;margin:16px 0}
+.lesson-highlight b{display:block;color:var(--brand-ink);margin-bottom:5px;font-size:13px}
+.mission-stage{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin:14px 0 10px}
+.mission-stage span{font-weight:700;color:var(--brand-ink)}
+.mission-scenario{font-size:15px;line-height:1.7;margin:15px 0}
+.mission-question{font-size:22px;line-height:1.3;margin:14px 0 17px}
+.mission-feedback{padding:17px;border-radius:15px;background:var(--surface);border:1px solid var(--border);margin-top:16px;scroll-margin-top:80px}
+.mission-feedback h3{font-size:17px;line-height:1.3;margin-bottom:10px}
+.mission-feedback p{font-size:14px;line-height:1.65;margin:8px 0}
+.mission-feedback .feedback-label{color:var(--brand-ink);font-size:12px;font-weight:800;display:block;margin-top:13px}
+.mission-feedback .coach{margin:0 0 12px}
+.mission-feedback details,.explain details{margin-top:13px;font-size:13px}
+.mission-feedback summary,.explain summary{font-weight:700;cursor:pointer;min-height:40px;align-content:center}
+.mission-feedback li,.explain li{margin-bottom:10px;line-height:1.6}
+.mission-feedback ul,.explain ul{padding-left:18px}
+.feedback-misconception{font-size:12px!important;color:var(--muted)}
+.mission-choice .choice-status{font-size:12px;font-weight:700;display:block;margin-top:5px}
+.mission-bottom{display:flex;flex-direction:column;gap:9px;margin-top:18px}
+.mission-reward{text-align:center;padding:8px 0 16px}
+.mission-reward .professor{width:200px;margin:0 auto}
+.mission-reward h1{font-size:32px;margin:12px 0}
+.mission-reward p{font-size:14px;line-height:1.65;color:var(--muted)}
+.reward-token{display:inline-block;border-radius:999px;background:var(--brand-soft);color:var(--brand-ink);padding:7px 13px;font-size:13px;font-weight:800;margin:8px 0}
+.review-note{font-size:13px;color:var(--muted);line-height:1.6;margin:14px 0}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin:17px 0}
+.filter-row button{font:700 12px var(--body);border:1px solid var(--border);border-radius:999px;padding:9px 12px;min-height:42px;background:var(--surface);color:var(--fg)}
+.filter-row button[aria-pressed="true"]{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.mistake-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0}
+.mistake-metrics>div{background:var(--surface-2);border-radius:12px;padding:13px 8px;text-align:center}
+.mistake-metrics b{font-family:var(--dsp);font-size:23px;display:block}
+.mistake-metrics span{font-size:11px;color:var(--muted)}
+.topic-row{padding:13px 0;border-bottom:1px solid var(--border)}
+.topic-row:last-child{border-bottom:0}
+.topic-row .topic-line{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:14px}
+.topic-row .topic-line b{font-size:14px}
+.topic-row .study-caption{margin:4px 0}
+.topic-row button{min-height:35px;font-size:12px;padding:5px 0}
+.mistake-item{border:1px solid var(--border);border-radius:14px;background:var(--surface);margin-bottom:11px;overflow:hidden}
+.mistake-item summary{padding:15px;cursor:pointer;list-style-position:inside;line-height:1.5;font-size:14px;font-weight:600}
+.mistake-item summary small{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px}
+.mistake-body{padding:0 15px 15px;font-size:14px;line-height:1.65}
+.mistake-body p{margin:10px 0}
+.mistake-body .answer-label{display:block;font-size:12px;font-weight:800;color:var(--brand-ink)}
+.empty-study{padding:23px 0;text-align:center}
+.empty-study .professor{margin:0 auto;width:145px}
+.empty-study h2{font-size:23px;line-height:1.25;margin:16px 0 10px}
+.empty-study p{font-size:14px;color:var(--muted);line-height:1.6;margin:0 auto 17px;max-width:34ch}
+.study-form{display:flex;flex-direction:column;gap:18px}
+.study-form label{font-size:14px;font-weight:700;display:block}
+.study-form label>span{display:block;font-size:12px;font-weight:400;color:var(--muted);margin:5px 0 8px;line-height:1.5}
+.study-form select,.study-form input[type="date"]{display:block;width:100%;padding:13px;background:var(--surface);color:var(--fg);font:16px var(--body);border:1px solid var(--border);border-radius:12px;min-height:48px}
+.study-form .check-setting{display:flex;align-items:center;gap:12px;min-height:44px}
+.study-form input[type="checkbox"]{width:20px;height:20px;accent-color:var(--brand)}
+.guide-outline{margin-top:22px}
+.guide-outline p{font-size:13px;line-height:1.6}
+.lesson-library{margin:20px 0}
+.lesson-library details{border-bottom:1px solid var(--border);padding:13px 0}
+.lesson-library summary{cursor:pointer;font-weight:700;font-size:15px;line-height:1.5;min-height:36px}
+.lesson-library p{font-size:14px;line-height:1.65}
+.lesson-library a{font-size:12px;overflow-wrap:anywhere}
+.lesson-library .lesson-source{font-size:12px;color:var(--muted)}
+.safety-note{font-size:12px;color:var(--muted);line-height:1.6;margin:15px 0}
+.ach.locked{opacity:1;filter:none;background:var(--surface-2)}
+.ach.locked .ai{opacity:.65}
+.screen-reader-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+nav.tabs .maxw{display:flex;justify-content:space-around;width:100%;max-width:480px}
+nav.tabs button{flex:1;min-width:0;min-height:48px;padding:4px 3px;font-size:11px}
+nav.tabs{padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
+#storage-notice{position:sticky;bottom:80px;z-index:40;background:var(--surface);color:var(--fg);border:2px solid var(--brand);padding:12px;font-size:13px;max-width:448px;margin:0 auto;border-radius:12px}
+dialog{background:var(--surface);color:var(--fg);border:1px solid var(--border);border-radius:18px;padding:24px;max-width:min(420px,90vw);box-sizing:border-box}
+dialog::backdrop{background:#0008}
+dialog h2{font-size:23px;line-height:1.2}dialog p{font-size:14px;line-height:1.6}
+:root[data-coach-motion="off"] .professor,:root[data-coach-motion="off"] section,:root[data-coach-motion="off"] .pop{animation:none!important}
+@media(prefers-reduced-motion:reduce){.professor{animation:none!important}*{transition:none!important}}
+@media(max-width:380px){.professor-welcome{grid-template-columns:108px 1fr;gap:5px}.professor-welcome .professor{width:108px}.professor-welcome .study-title{font-size:23px}.professor-welcome p{font-size:13px}.brand b{font-size:14px}.lvlchip{padding:5px 7px;gap:4px}.lvlchip span{font-size:10px}.study-title{font-size:26px}.study-panel{padding:16px}.coach{gap:8px}.coach .professor{width:63px}.mission-question{font-size:20px}}

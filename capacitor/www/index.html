@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PMP Field Trainer</title>
-<meta name="description" content="Gamified PMP exam prep — 300 current questions, mock exams, and a study map for the 2026 exam.">
+<title>PM Professor | PMP Exam Prep</title>
+<meta name="description" content="PM Professor: self-paced PMP exam prep with guided study plans, an animated professor, project missions, and clear feedback on every mistake.">
 <link rel="manifest" href="./manifest.webmanifest">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181231">
@@ -12,7 +12,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="PMP Trainer">
+<meta name="apple-mobile-web-app-title" content="PM Professor">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <link rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png">
@@ -254,13 +254,14 @@ nav.tabs button.on{color:var(--brand-ink)}
 .lvlcard .lvtrack i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--people))}
 </style>
 
+<link rel="stylesheet" href="./study.css">
 <canvas id="fx" hidden></canvas>
 
 <div class="app">
   <header class="bar">
     <div class="brand">
       <div class="logo">P</div>
-      <div><b>PMP Field Trainer</b><small id="lvlname">Initiating</small></div>
+      <div><b>PM Professor</b><small id="lvlname">Initiating</small></div>
     </div>
     <div class="lvlchip" title="Your level and XP">
       <div class="lv" id="lvlnum">1</div><span id="xpval">0 XP</span>
@@ -269,6 +270,9 @@ nav.tabs button.on{color:var(--brand-ink)}
 
   <!-- HOME -->
   <section id="home">
+    <div id="studyHome"></div>
+    <details class="practice-stats">
+    <summary>Your practice statistics</summary>
     <div class="hero">
       <div class="ring-wrap">
         <svg width="188" height="188" viewBox="0 0 188 188" aria-hidden="true">
@@ -279,7 +283,7 @@ nav.tabs button.on{color:var(--brand-ink)}
             <stop offset="0" stop-color="var(--brand)"/><stop offset="1" stop-color="var(--people)"/>
           </linearGradient></defs>
         </svg>
-        <div class="ring-center"><div class="pct tnum" id="readypct">0%</div><div class="lbl">Exam Ready</div></div>
+        <div class="ring-center"><div class="pct tnum" id="readypct">0%</div><div class="lbl">Practice accuracy</div></div>
       </div>
       <div class="verdict" id="verdict">Take a set to measure your readiness</div>
       <div class="statrow">
@@ -296,13 +300,14 @@ nav.tabs button.on{color:var(--brand-ink)}
       </div>
       <div class="tip"><span>💡</span><div id="tip"></div></div>
     </div>
+    </details>
 
-    <div class="section-head"><h2>Jump in</h2><span class="muted" style="font-size:12px" id="qbanktotal"></span></div>
+    <div class="section-head"><h2>Practice your way</h2><span class="muted" style="font-size:12px" id="qbanktotal"></span></div>
     <div class="modes">
       <button class="mode" onclick="start('mock')">
         <div class="ic a-mock">★</div>
-        <div class="tx"><b>Mock Exam</b><p>40 questions, weighted like the real 2026 exam</p></div>
-        <div class="meta">4&nbsp;dom<span class="best" id="best-mock"></span></div>
+        <div class="tx"><b>Mini Mock</b><p>40 questions across the three exam domains</p></div>
+        <div class="meta">40 Q<span class="best" id="best-mock"></span></div>
       </button>
       <button class="mode" onclick="start('quick')">
         <div class="ic a-quick">⚡</div>
@@ -335,7 +340,7 @@ nav.tabs button.on{color:var(--brand-ink)}
       Built from <b>The PMP Field Guide</b> · Professor Farooq A. Shah, MPM, PMP, ACP<br>
       Aligned to the PMI 2026 Examination Content Outline (exam of 9 Jul 2026).<br>
       <button class="toggle" onclick="toggleTheme()" style="margin-top:10px">Toggle light / dark</button>
-      <button class="toggle" onclick="resetProgress()" style="margin-top:10px">Reset progress</button>
+      <button class="toggle" onclick="Study.openPlan()" style="margin-top:10px">Study settings</button>
     </footer>
   </section>
 
@@ -348,9 +353,10 @@ nav.tabs button.on{color:var(--brand-ink)}
       <div class="timer tnum" id="qtimer" hidden></div>
     </div>
     <div class="chips" id="qchips"></div>
+    <div id="quiz-coach"></div>
     <h2 class="qtext" id="qtext"></h2>
     <div class="opts" id="qopts"></div>
-    <div id="qexplain"></div>
+    <div id="qexplain" aria-live="polite"></div>
     <div class="qnav" id="qnav" hidden><button class="btn" id="nextbtn" onclick="next()">Next →</button></div>
   </section>
 
@@ -373,6 +379,7 @@ nav.tabs button.on{color:var(--brand-ink)}
       <div class="badge" id="r-badge" hidden></div>
       <p class="muted" id="r-msg" style="max-width:32ch;margin:8px 0 0"></p>
     </div>
+    <div id="results-coach"></div>
 
     <div class="card" style="padding:16px;margin-top:20px" id="r-dombox">
       <div class="eyebrow" style="margin-bottom:12px">By domain</div>
@@ -389,6 +396,7 @@ nav.tabs button.on{color:var(--brand-ink)}
       <button class="btn" id="btnRetry" onclick="retry()">Try again</button>
     </div>
     <button class="btn ghost" style="display:block;margin:12px auto 0" onclick="go('home')">Back to home</button>
+    <button class="btn sec" style="margin-top:10px" onclick="Study.showMistakes()">See what to work on</button>
   </section>
 
   <!-- REVIEW -->
@@ -404,16 +412,17 @@ nav.tabs button.on{color:var(--brand-ink)}
     <button class="back" onclick="go('home')">‹ Home</button>
     <h2 style="font-size:23px;margin:6px 0 2px">The PMP Field Guide</h2>
     <p class="muted" style="font-size:13.5px;margin:0 0 4px">
-      Everything you need to pass — built for the exam PMI launched on 9 July 2026.
-      Tap a part to see what it covers, and practice the topics that have questions.</p>
+      Learn a principle, see it worked through, then apply it in a mission.
+      Your professor helps you understand the decisions behind the answers.</p>
+    <div id="lessonLibrary"></div>
     <div class="card" style="padding:12px 14px;margin:12px 0 16px;font-size:13px">
       <b style="color:var(--brand-ink)">What changed in 2026:</b>
       <span class="dot a-people"></span>People <b>33%</b> ·
       <span class="dot a-process"></span>Process <b>41%</b> ·
       <span class="dot a-business"></span>Business Env <b>26%</b>. 180 Q / 240 min · PMBOK 8 · 40% predictive, 60% agile &amp; hybrid.
     </div>
-    <div class="toc" id="tocList"></div>
-    <footer>Verified against the PMI 2026 PMP Examination Content Outline.</footer>
+    <details class="guide-outline"><summary>The Field Guide outline</summary><p class="muted">Chapter descriptions from the companion guide. The interactive lessons are above.</p><div class="toc" id="tocList"></div></details>
+    <footer>Original study material aligned to the PMI 2026 PMP Examination Content Outline. Practice scores do not predict an official result.</footer>
   </section>
 
   <!-- LIGHTNING ROUND -->
@@ -451,20 +460,32 @@ nav.tabs button.on{color:var(--brand-ink)}
       <div class="stat"><b class="tnum" id="a-acc">—</b><small>Accuracy</small></div>
     </div>
     <div class="muted" style="font-size:12.5px;margin-top:10px" id="a-extra"></div>
+    <div id="missionAwards"></div>
     <div class="section-head"><h2 style="font-size:18px">Badges</h2><span class="muted" style="font-size:12px" id="a-badgecount"></span></div>
     <div class="ach-grid" id="achGrid"></div>
     <footer>Keep a daily streak and your badges fill in. New ones unlock as you practice.</footer>
   </section>
+  <section id="missions" hidden aria-label="Your project missions"></section>
+  <section id="mission" hidden aria-label="Study mission"></section>
+  <section id="mistakes" hidden aria-label="Your mistake review"></section>
+  <section id="plan" hidden aria-label="Your study plan settings"></section>
 </div>
+
+<div id="storage-notice" role="status" hidden></div>
+<dialog id="reset-dialog" aria-labelledby="reset-title"><h2 id="reset-title">Reset your study progress?</h2><p>This removes saved answers, missions, and achievements from this browser. Export a backup from study settings first if you want to keep them.</p><div class="row"><button class="btn sec" onclick="this.closest('dialog').close()">Keep progress</button><button class="btn" onclick="Study.resetConfirmed()">Reset progress</button></div></dialog>
 
 <nav class="tabs" id="tabs">
   <div class="maxw" style="display:flex;justify-content:space-around;width:100%">
     <button data-s="home" onclick="go('home')"><span class="ni">⌂</span>Home</button>
+    <button data-s="missions" onclick="go('missions')"><span class="ni">◇</span>Missions</button>
+    <button data-s="mistakes" onclick="go('mistakes')"><span class="ni">↺</span>Mistakes</button>
     <button data-s="achievements" onclick="go('achievements')"><span class="ni">★</span>Awards</button>
     <button data-s="toc" onclick="go('toc')"><span class="ni">▦</span>Guide</button>
   </div>
 </nav>
 
+<script src="./study-content.js"></script>
+<script src="./quiz-insights.js"></script>
 <script>
 /* ---------- QUESTION BANK ---------- */
 /* cat: practice bucket · dom: exam-weighting domain (People/Process/Business) · app: approach chip */
@@ -551,7 +572,7 @@ const QB=[
 {cat:"business",dom:B,app:"General",q:"A completed deliverable meets scope but creates a safety hazard. Your priority is to:",o:["Address the safety issue immediately, then analyze","Ship it to meet the committed date","Log it and handle it in the next phase","Ask the customer to formally accept it as-is"],a:0,e:"Imminent safety, legal, or compliance threats are the exception to 'assess first' — you act at once to stop the harm, then analyze."},
 {cat:"business",dom:B,app:"General",q:"Kaizen, applied in the business environment, refers to:",o:["Incremental, ongoing process improvement","One large improvement delivered at closing","Only agile retrospectives","Continuously expanding scope"],a:0,e:"Kaizen is continuous, incremental improvement embedded in how the organization works."},
 {cat:"business",dom:B,app:"General",q:"After a project transitions to operations, who typically owns realizing the benefits?",o:["The sponsor or business, not the project manager","The project manager, indefinitely","The vendor","The PMO alone"],a:0,e:"The PM delivers the capability; the sponsor/business owns and measures the ongoing benefits after transition."},
-{cat:"business",dom:B,app:"Predictive",q:"A project supports a fixed regulatory deadline. If scope and schedule conflict, what usually cannot move?",o:["The compliance deadline","The quality standards","The regulation itself","Worker safety"],a:0,e:"Regulatory deadlines are external constraints. You adjust scope, resources, or approach around them — not safety or the law."},
+{cat:"business",dom:B,app:"Predictive",q:"A project supports a fixed regulatory deadline. If scope and schedule conflict, what usually cannot move?",o:["The compliance deadline","The order of optional features","The resource allocation","The delivery approach"],a:0,e:"Regulatory deadlines are external constraints. You adjust scope, resources, or approach around them while preserving quality, safety, and legal obligations."},
 {cat:"business",dom:B,app:"General",q:"Between two candidate projects, which net present value (NPV) do you choose?",o:["The higher NPV","The lower NPV","The one with the longer payback period","The one with the lower IRR"],a:0,e:"Higher NPV means more value created in today's terms. NPV, IRR, BCR, and payback are financial selection metrics in the business environment."},
 
 /* ----- AGILE & HYBRID ----- */
@@ -598,7 +619,7 @@ const QB=[
 {cat:"formula",dom:PR,app:"Predictive",q:"Using parametric estimating at $50 per square foot for 2,000 square feet, the estimate is:",o:["$100,000","$52,000","$25,000","$2,000"],a:0,e:"Parametric = unit rate × quantity = $50 × 2,000 = $100,000. It scales a statistical relationship between a unit and a cost/duration."},
 {cat:"formula",dom:B,app:"General",q:"Choosing between two projects by benefit-cost ratio (BCR), you prefer:",o:["The higher BCR (above 1 means benefits exceed costs)","The lower BCR","The one with BCR below 1","BCR is irrelevant to selection"],a:0,e:"A BCR above 1.0 means benefits outweigh costs; higher is better. BCR sits with NPV, IRR, and payback among financial selection metrics."},
 {cat:"formula",dom:PR,app:"Predictive",q:"The point of total assumption (PTA) is a concept associated with which contract type?",o:["Fixed Price Incentive Fee (FPIF)","Cost Plus Fixed Fee (CPFF)","Time & Materials (T&M)","Firm Fixed Price (FFP)"],a:0,e:"PTA applies to FPIF contracts — above the PTA, the seller bears all additional cost."},
-{cat:"formula",dom:PR,app:"Predictive",q:"Which expression correctly defines earned value (EV)?",o:["EV = percent complete × BAC","EV = AC × CPI","EV = PV − AC","EV = BAC ÷ SPI"],a:0,e:"EV is the budgeted value of the work actually completed: percent complete × BAC."},
+{cat:"formula",dom:PR,app:"Predictive",q:"Which expression correctly defines earned value (EV)?",o:["EV = percent complete × BAC","EV = AC ÷ CPI","EV = PV − AC","EV = BAC ÷ SPI"],a:0,e:"EV is the budgeted value of the work actually completed: percent complete × BAC."},
 
 /* ===== PEOPLE (added) ===== */
 {cat:"people",dom:P,app:"General",q:"A minor disagreement flares up over a trivial point and is distracting the team from a deadline. Which conflict mode is a reasonable short-term choice?",o:["Avoiding / withdrawing until it cools and the deadline passes","Forcing an immediate decision","Collaborating on a full solution now","Escalating to the sponsor"],a:0,e:"Avoiding can be appropriate for trivial issues or when emotions need to cool, as a temporary measure. It is a poor choice for important, lasting conflicts."},
@@ -796,21 +817,21 @@ const CATS={
   people:{name:"People",cls:"a-people",dot:"a-people",icon:"👥",desc:"Conflict, leadership, teams & stakeholders — 33% of the exam"},
   process:{name:"Process",cls:"a-process",dot:"a-process",icon:"⚙",desc:"Scope, schedule, risk, quality & procurement — 41%"},
   business:{name:"Business Environment",cls:"a-business",dot:"a-business",icon:"◎",desc:"Governance, compliance, benefits, ESG & AI — 26%"},
-  agile:{name:"Agile & Hybrid",cls:"a-agile",dot:"",icon:"∞",desc:"Scrum, Kanban, servant leadership & tailoring — 60% of items"},
+  agile:{name:"Agile & Hybrid",cls:"a-agile",dot:"",icon:"∞",desc:"Scrum, Kanban, servant leadership & tailoring"},
   formula:{name:"Formulas",cls:"a-formula",dot:"",icon:"∑",desc:"Earned value, PERT, channels & selection metrics"}
 };
 const LEVELS=[
   {xp:0,name:"Initiating"},{xp:120,name:"Planning"},{xp:320,name:"Executing"},
-  {xp:640,name:"Monitoring"},{xp:1040,name:"Closing"},{xp:1600,name:"PMP-Ready"}
+  {xp:640,name:"Monitoring"},{xp:1040,name:"Closing"},{xp:1600,name:"Lifelong Learner"}
 ];
 const TIPS=[
   "Read the <b>last sentence first</b>, then the scenario. Know what is being asked before the distractors shape your thinking.",
-  "Roughly <b>half the exam</b> can be answered from mindset alone: assess before acting, collaborate over command, proactive over reactive.",
-  "A change request? The answer is almost always <b>integrated change control</b> — never implement or reject on the spot.",
+  "Use the scenario's <b>context</b>: urgency, authority, the delivery approach, and the requested next action all matter.",
+  "For a change request, clarify the benefit and impacts, then use the project's <b>agreed approval process</b>.",
   "When a scenario asks 'first,' find where the team is on the <b>five-step ladder</b> and take the very next step.",
   "<b>Classify the approach</b> — predictive, agile, or hybrid — before you answer. It flips the correct response.",
-  "Safety, legal, or compliance threat? <b>Act immediately</b> to stop the harm, analyze afterward. That's the one exception to 'assess first.'",
-  "Servant leaders <b>remove impediments</b> and help the team find answers — they never hand down the solution.",
+  "An immediate safety threat calls for <b>protective action</b>. Then use the appropriate reporting and review process.",
+  "Servant leaders <b>remove impediments</b>, help people develop, and tailor their support to the team's needs.",
   "EV is always <b>first</b> in both variance formulas and the <b>numerator</b> of both indices. That one hook covers most EVM items."
 ];
 let st={xp:0,answered:0,correct:0,streak:0,lastDay:null,best:{},badges:[],seen:{},daily:{date:null,count:0,goal:15},lightningBest:0,misses:{},freezes:1,mastered:0,domStats:{People:[0,0],Process:[0,0],Business:[0,0]}};
@@ -819,15 +840,15 @@ let session=null, timerId=null;
 function load(){
   try{const s=JSON.parse(localStorage.getItem("pmpft"));if(s)st=Object.assign(st,s);}catch(e){}
   // streak: broken only when the gap is too big for a freeze to cover
-  const today=new Date().toISOString().slice(0,10);
+  const today=todayStr();
   if(st.lastDay){
     const gap=Math.round((new Date(today)-new Date(st.lastDay))/86400000);
     if(gap>=3 || (gap===2 && !(st.freezes>0))) st.streak=0;
   }
 }
-function save(){try{localStorage.setItem("pmpft",JSON.stringify(st));}catch(e){}}
+function save(){try{localStorage.setItem("pmpft",JSON.stringify(st));}catch(e){if(window.Study)Study.notice();}}
 function markDay(){
-  const today=new Date().toISOString().slice(0,10);
+  const today=todayStr();
   if(st.lastDay===today)return;
   st._freezeUsed=false;
   if(!st.lastDay){st.streak=1;}
@@ -842,23 +863,21 @@ function markDay(){
   if(st._freezeUsed)setTimeout(()=>miniToast("🛡 Streak freeze used — streak saved"),450);
 }
 function levelFor(xp){let l=0;for(let i=0;i<LEVELS.length;i++)if(xp>=LEVELS[i].xp)l=i;return l;}
-function readiness(){return st.answered<5?0:Math.round(st.correct/st.answered*100);}
+function readiness(){return st.answered?Math.round(st.correct/st.answered*100):0;}
 function verdictText(p){
-  if(st.answered<5)return"Take a set to measure your readiness";
-  if(p>=85)return"🎯 Exam ready — book it with confidence";
-  if(p>=75)return"On track to pass — keep the streak going";
-  if(p>=67)return"Getting close — tighten your weak domains";
-  return"Keep studying — focus on your lowest domain";
+  if(!st.answered)return"Your practice accuracy will appear after your first answer";
+  return "Accuracy across "+st.answered+" practice attempts · not an exam prediction";
 }
 
 /* ---------- NAV ---------- */
-const SCREENS=["home","quiz","results","review","toc","achievements","lightning"];
+const SCREENS=["home","quiz","results","review","toc","achievements","lightning","missions","mission","mistakes","plan"];
 function go(id){SCREENS.forEach(s=>document.getElementById(s).hidden=(s!==id));window.scrollTo(0,0);
-  const navOn=["home","achievements","toc"].indexOf(id)>=0;
+  const navOn=["home","achievements","toc","missions","mistakes"].indexOf(id)>=0;
   const tabs=document.getElementById("tabs");
-  if(tabs){tabs.style.display=navOn?"flex":"none";[...tabs.querySelectorAll("button")].forEach(b=>b.classList.toggle("on",b.dataset.s===id));}
+  if(tabs){tabs.style.display=navOn?"flex":"none";[...tabs.querySelectorAll("button")].forEach(b=>{b.classList.toggle("on",b.dataset.s===id);if(b.dataset.s===id)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});}
   if(id==="achievements")renderAchievements();
   if(id==="home")refreshHome();
+  if(window.Study)Study.onNavigate(id);
 }
 function refreshHome(){
   const lv=levelFor(st.xp);
@@ -881,6 +900,8 @@ function refreshHome(){
   const rm=document.getElementById("review-meta");
   if(rm){const tot=missCount(),due=dueMisses().length;
     rm.innerHTML= tot? (due?('<span style="color:var(--business);font-weight:800">'+due+' due</span>'):(tot+' tracked')) : 'As you miss';}
+  buildAreas();
+  if(window.Study)Study.renderHome();
 }
 function bestTag(elId,key){
   const el=document.getElementById(elId);const b=st.best[key];
@@ -911,17 +932,15 @@ function pick(arr,n){return shuffle(arr).slice(0,n);}
 
 /* unseen-first draw: serves fresh questions until a pool is exhausted, then reshuffles */
 function draw(poolIdx,n){
-  if(n>=poolIdx.length){poolIdx.forEach(i=>st.seen[i]=1);return shuffle(poolIdx.slice());}
+  if(n>=poolIdx.length)return shuffle(poolIdx.slice());
   let unseen=poolIdx.filter(i=>!st.seen[i]);
   let chosen;
   if(unseen.length>=n){chosen=pick(unseen,n);}
   else{
     chosen=shuffle(unseen);                 // take every remaining unseen
-    poolIdx.forEach(i=>{delete st.seen[i];}); // cycle: this pool is fresh again
     const rem=poolIdx.filter(i=>chosen.indexOf(i)<0);
     chosen=chosen.concat(pick(rem,n-chosen.length));
   }
-  chosen.forEach(i=>st.seen[i]=1);
   return chosen;
 }
 function idxByCat(c){const a=[];QB.forEach((q,i)=>{if(q.cat===c)a.push(i);});return a;}
@@ -950,13 +969,13 @@ function buildQueue(mode){
 }
 function modeTitle(mode){
   if(mode==="quick")return"Quick 10";
-  if(mode==="mock")return"Mock Exam";
+  if(mode==="mock")return"Mini Mock";
   if(mode==="misses")return"Review Misses";
   return CATS[mode].name;
 }
 function start(mode){
-  markDay();
   const queue=buildQueue(mode);
+  if(!queue.length){miniToast("No questions are available for this set");return;}
   session={mode,title:modeTitle(mode),queue,idx:0,answers:[],correct:0,start:Date.now()};
   go("quiz");
   // timer only for mock
@@ -971,8 +990,9 @@ function startTimer(){stopTimer();timerId=setInterval(()=>{
 },1000);}
 function stopTimer(){if(timerId){clearInterval(timerId);timerId=null;}}
 
-function renderQ(){
+function renderQ(existingOrder){
   const q=session.queue[session.idx];const n=session.queue.length;
+  st.seen[QB.indexOf(q)]=1;save();
   document.getElementById("qcount").textContent=(session.idx+1)+"/"+n;
   document.getElementById("pfill").style.width=((session.idx)/n*100)+"%";
   // chips
@@ -984,7 +1004,7 @@ function renderQ(){
   document.getElementById("qtext").textContent=q.q;
   const opts=document.getElementById("qopts");opts.innerHTML="";
   const keys=["A","B","C","D","E"];
-  const order=shuffle(q.o.map((_,i)=>i));   // randomize option positions each view
+  const order=Array.isArray(existingOrder)?existingOrder:shuffle(q.o.map((_,i)=>i));
   session.order=order;
   session.correctDisp=order.indexOf(q.a);
   order.forEach((orig,disp)=>{
@@ -994,8 +1014,10 @@ function renderQ(){
   });
   document.getElementById("qexplain").innerHTML="";
   document.getElementById("qnav").hidden=true;
+  if(window.Study)Study.questionReady(q);
 }
 function answer(i,btn){
+  if(!session||session.answers[session.idx])return;
   const q=session.queue[session.idx];
   const opts=[...document.getElementById("qopts").children];
   const correct=session.correctDisp;
@@ -1007,6 +1029,7 @@ function answer(i,btn){
   const right=i===correct;
   session.answers.push({q,order:session.order.slice(),chosenDisp:i,correctDisp:correct,right});
   if(right)session.correct++;
+  markDay();
   // global stats
   st.answered++;if(right)st.correct++;
   st.domStats[q.dom][0]++;if(right)st.domStats[q.dom][1]++;
@@ -1019,6 +1042,7 @@ function answer(i,btn){
   const ex=document.getElementById("qexplain");
   ex.className="explain "+(right?"ok":"no");
   ex.innerHTML=`<div class="vhead">${right?"✓ Correct":"✕ Not quite"}</div><div>${q.e}</div>`;
+  if(window.Study)Study.onPracticeAnswer(q,session.order[i],session.mode);
   const last=session.idx===session.queue.length-1;
   document.getElementById("nextbtn").textContent=last?"See results →":"Next →";
   document.getElementById("qnav").hidden=false;
@@ -1032,7 +1056,7 @@ function next(){
   if(session.idx<session.queue.length-1){session.idx++;renderQ();window.scrollTo(0,0);}
   else finish();
 }
-function confirmQuit(){stopTimer();refreshHome();go("home");}
+function confirmQuit(){if(window.Study)Study.persistQuiz();stopTimer();refreshHome();go("home");}
 
 /* ---------- RESULTS ---------- */
 function finish(){
@@ -1075,10 +1099,9 @@ function finish(){
   }
   document.getElementById("r-dombox").style.display=any?"block":"none";
   // message
-  const msg=pct>=85?"You are hitting exam-ready territory. Do two or three full-length sessions to build stamina, then book it.":
-    pct>=75?"Above the pass threshold. Keep drilling your weakest domain and the new question formats.":
-    pct>=67?"Right at the lower edge. Review every miss — including the ones you got right for the wrong reason.":
-    "Below the pass zone for now. Reread the explanations, revisit the Study Map, and practice your lowest domain next.";
+  const msg=pct>=85?"Strong practice. Try fresh situations and revisit concepts after a delay to check retention.":
+    pct>=60?"Your answers give you a useful study map. Review the clues behind the decisions you missed.":
+    "Take one concept at a time. The professor’s explanations and guided missions can help you work through the difficult decisions.";
   document.getElementById("r-msg").textContent=msg;
   // badge banner
   const bb=document.getElementById("r-badge");
@@ -1087,9 +1110,10 @@ function finish(){
   const eb=document.getElementById("r-earnedbox"),e=document.getElementById("r-earned");
   if(st.badges.length){eb.hidden=false;e.innerHTML=st.badges.map(x=>`<span class="btag">🏅 ${x}</span>`).join("");}else eb.hidden=true;
   go("results");
+  if(window.Study)Study.sessionFinished(session);
   if(pct>=75)fireConfetti();
 }
-function retry(){if(lastWasLightning)startLightning();else start(session.mode);}
+function retry(){if(lastWasLightning)startLightning();else if(session.mode==="topic")Study.practiceTopic(session.conceptId);else start(session.mode);}
 function reviewAnswers(){
   if(lastWasLightning)return;
   const list=document.getElementById("reviewList");list.innerHTML="";
@@ -1108,7 +1132,7 @@ function reviewAnswers(){
       Q${i+1} · ${q.dom}${a.right?' · <span style="color:var(--good)">Correct</span>':' · <span style="color:var(--bad)">Missed</span>'}</div>
       <div style="font-family:var(--dsp);font-weight:600;font-size:15px;margin-bottom:8px">${q.q}</div>
       ${opts}
-      <div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">${q.e}</div>`;
+      <div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)">${window.Study?Study.feedbackHTML(q,order[a.chosenDisp]):q.e}</div>`;
     list.appendChild(card);
   });
   go("review");
@@ -1164,6 +1188,7 @@ function resetProgress(){
 
 /* ---------- CONFETTI ---------- */
 function fireConfetti(){
+  if(window.Study&&!Study.getState().preferences.motion)return;
   if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
   const cv=document.getElementById("fx");cv.hidden=false;
   const ctx=cv.getContext("2d");const DPR=Math.min(2,devicePixelRatio||1);
@@ -1195,10 +1220,10 @@ const BADGES=[
   {id:"Agile Ace",icon:"∞",desc:"Score 80%+ in an Agile set"},
   {id:"Numbers Game",icon:"∑",desc:"Score 80%+ in a Formulas set"},
   {id:"Perfectionist",icon:"★",desc:"100% on a set of 10 or more"},
-  {id:"Mock Slayer",icon:"◆",desc:"Finish a full Mock Exam"},
+  {id:"Mock Slayer",icon:"◆",desc:"Finish a 40-question Mini Mock"},
   {id:"Lightning",icon:"⚡",desc:"Score 150+ in a Lightning Round"},
-  {id:"Exam Ready",icon:"🎯",desc:"Reach 85% exam readiness"},
-  {id:"Max Level",icon:"♛",desc:"Reach the PMP-Ready level"},
+  {id:"Practice Momentum",icon:"🎯",desc:"85% practice accuracy over 50 or more attempts"},
+  {id:"Max Level",icon:"♛",desc:"Reach the Lifelong Learner XP level"},
   {id:"Comeback Kid",icon:"↺",desc:"Master 10 questions you once missed"}
 ];
 function earn(id,out){if(!st.badges.includes(id)){st.badges.push(id);out.push(id);}}
@@ -1211,12 +1236,12 @@ function awardBadges(){
   if(st.streak>=7)earn("On Fire",out);
   if(st.daily && st.daily.date===todayStr() && st.daily.count>=(st.daily.goal||15))earn("Daily Dedication",out);
   if(st.xp>=1600)earn("Max Level",out);
-  if(readiness()>=85)earn("Exam Ready",out);
+  if(st.answered>=50&&readiness()>=85)earn("Practice Momentum",out);
   if((st.mastered||0)>=10)earn("Comeback Kid",out);
   if(out.length)save();
   return out;
 }
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function trackDaily(){const t=todayStr();if(!st.daily)st.daily={date:null,count:0,goal:15};if(st.daily.date!==t){st.daily.date=t;st.daily.count=0;}st.daily.count++;}
 function updateDaily(){
   if(!st.daily)st.daily={date:null,count:0,goal:15};
@@ -1238,6 +1263,7 @@ function miniToast(txt){
 function addMiss(qi){ if(qi<0)return; if(!st.misses)st.misses={}; st.misses[qi]={box:1,due:Date.now()}; }
 function promoteMiss(qi){
   if(qi<0||!st.misses||!st.misses[qi])return;
+  if(st.misses[qi].due>Date.now())return;
   const nb=st.misses[qi].box+1; const days={2:1,3:3,4:7};
   if(nb>4){ delete st.misses[qi]; st.mastered=(st.mastered||0)+1; return; }   // graduated — mastered
   st.misses[qi]={box:nb,due:Date.now()+days[nb]*86400000};
@@ -1267,9 +1293,9 @@ function renderAchievements(){
 /* ---- Lightning Round ---- */
 let lsession=null,lTimer=null,lastWasLightning=false;
 function startLightning(){
-  markDay();
   const queue=draw(QB.map((_,i)=>i),60).map(i=>QB[i]);save();
   lsession={queue,idx:0,score:0,lives:3,combo:0,answered:0,correct:0,end:Date.now()+60000};
+  document.getElementById("l-score").textContent="0";
   go("lightning");lRender();
   stopLTimer();
   lTimer=setInterval(()=>{
@@ -1283,6 +1309,7 @@ function stopLTimer(){if(lTimer){clearInterval(lTimer);lTimer=null;}}
 function lRender(){
   if(lsession.idx>=lsession.queue.length){lsession.queue=lsession.queue.concat(draw(QB.map((_,i)=>i),30).map(i=>QB[i]));save();}
   const q=lsession.queue[lsession.idx];
+  st.seen[QB.indexOf(q)]=1;save();
   const domColor=q.dom==="People"?"var(--people)":q.dom==="Process"?"var(--process)":"var(--business)";
   document.getElementById("l-chips").innerHTML=`<span class="chip dom" style="background:${domColor}">${q.dom}</span><span class="chip appr">${q.app}</span>`;
   document.getElementById("l-q").textContent=q.q;
@@ -1291,6 +1318,7 @@ function lRender(){
   const opts=document.getElementById("l-opts");opts.innerHTML="";
   const keys=["A","B","C","D"];
   const order=shuffle(q.o.map((_,i)=>i));const correctDisp=order.indexOf(q.a);
+  lsession.order=order;
   order.forEach((orig,disp)=>{const b=document.createElement("button");b.className="opt";
     b.innerHTML=`<span class="key">${keys[disp]}</span><span>${q.o[orig]}</span>`;
     b.onclick=()=>lAnswer(disp,correctDisp);opts.appendChild(b);});
@@ -1301,6 +1329,7 @@ function lAnswer(i,correct){
   if(opts[0]&&opts[0].disabled)return;
   opts.forEach((o,idx)=>{o.disabled=true;if(idx===correct)o.classList.add("correct");else if(idx===i)o.classList.add("wrong");else o.classList.add("dim");});
   const right=i===correct;const q=lsession.queue[lsession.idx];
+  markDay();if(window.Study)Study.recordPractice(q,lsession.order[i],"lightning");
   lsession.answered++;st.answered++;if(right)st.correct++;st.domStats[q.dom][0]++;if(right)st.domStats[q.dom][1]++;
   if(right){lsession.combo++;lsession.correct++;const mult=Math.min(5,lsession.combo);lsession.score+=10*mult;st.xp+=5;
     const sc=document.getElementById("l-score");if(sc){sc.textContent=lsession.score;sc.classList.remove("pop");void sc.offsetWidth;sc.classList.add("pop");}
@@ -1309,8 +1338,9 @@ function lAnswer(i,correct){
   trackDaily();save();awardBadges();
   document.getElementById("l-combo").textContent=lsession.combo>=2?("🔥 Combo ×"+Math.min(5,lsession.combo)):"";
   const lv=Math.max(0,lsession.lives);document.getElementById("l-lives").textContent="❤".repeat(lv)+"🖤".repeat(3-lv);
-  if(lsession.lives<=0){setTimeout(lEnd,480);return;}
-  setTimeout(()=>{if(lsession){lsession.idx++;lRender();}},430);
+  const round=lsession;
+  if(lsession.lives<=0){setTimeout(()=>{if(lsession===round)lEnd();},480);return;}
+  setTimeout(()=>{if(lsession===round){lsession.idx++;lRender();}},430);
 }
 function lEnd(){
   if(!lsession)return;stopLTimer();
@@ -1333,6 +1363,7 @@ function lEnd(){
   const _br=document.getElementById("btnReview");if(_br)_br.style.display="none";
   lastWasLightning=true;lsession=null;
   go("results");
+  if(window.Study)Study.renderResultCoach(null);
   if(final>0&&isHigh)fireConfetti();
 }
 function lQuit(){stopLTimer();lsession=null;refreshHome();go("home");}
@@ -1341,8 +1372,11 @@ function lQuit(){stopLTimer();lsession=null;refreshHome();go("home");}
 (function(){
   try{const th=localStorage.getItem("pmpft-theme");if(th)document.documentElement.setAttribute("data-theme",th);}catch(e){}
   load();buildAreas();buildTOC();refreshHome();go("home");
+  if(st.badges.includes("Exam Ready")){st.badges=st.badges.filter(b=>b!=="Exam Ready");save();}
 })();
 </script>
+
+<script src="./study.js"></script>
 
 <script>
 /* Service worker: offline cache + auto update-check. When a new version is deployed,

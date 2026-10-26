@@ -1,8 +1,8 @@
 {
-  "name": "pmp-field-trainer",
-  "version": "1.0.0",
+  "name": "pm-professor",
+  "version": "1.1.1",
   "private": true,
-  "description": "PMP Field Trainer — PMP exam prep app",
+  "description": "PM Professor \u2014 self-paced PMP exam prep with guided missions and an animated study mentor",
   "scripts": {
     "sync": "cap sync",
     "ios": "cap open ios"
